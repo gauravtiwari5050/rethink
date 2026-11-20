@@ -138,29 +138,58 @@ for i, z in enumerate((0.60, 0.42)):
     parts.append(cyl(f'lens{i}', 0.056, 0.014, (0.19, by + 0.001, z), M_LENS))
 parts.append(cyl('flash', 0.018, 0.006, (0.05, T / 2 + 0.002, 0.60), mat('flash', srgb('#e9e4d4'), rough=0.3)))
 # the Rethink dot: a single polished disc, the phone's only mark
-MARK_Z = -0.08
-parts.append(cyl('mark_ring', 0.044, 0.003, (0, T / 2 + 0.0015, MARK_Z), M_DOT))
-M_GLOW = bpy.data.materials.new('glow'); M_GLOW.use_nodes = True
-gnt = M_GLOW.node_tree; gnt.nodes.clear()
-ge = gnt.nodes.new('ShaderNodeEmission'); ge.inputs['Color'].default_value = (*srgb('#3ef08a'), 1); ge.inputs['Strength'].default_value = 1.15
-gnt.links.new(ge.outputs[0], gnt.nodes.new('ShaderNodeOutputMaterial').inputs['Surface'])
-parts.append(cyl('mark_light', 0.035, 0.0034, (0, T / 2 + 0.0019, MARK_Z), M_GLOW))
+# ---------- the eye: a lens-like status light, set into the back glass ----------
+MARK_Z = 0.02
+EY = T / 2                      # back surface
+ER = 0.088                      # lens radius
+def emission_mat(name):
+    m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
+    return m, nt, nt.nodes.new('ShaderNodeOutputMaterial')
 
-# halo: light diffusing into the frosted glass around the dot
-M_HALO = bpy.data.materials.new('halo'); M_HALO.use_nodes = True; M_HALO.blend_method = 'BLEND'
-nt = M_HALO.node_tree; nt.nodes.clear()
-o = nt.nodes.new('ShaderNodeOutputMaterial'); mix = nt.nodes.new('ShaderNodeMixShader')
-tr = nt.nodes.new('ShaderNodeBsdfTransparent'); em = nt.nodes.new('ShaderNodeEmission')
-em.inputs['Color'].default_value = (*srgb('#2bd36f'), 1); em.inputs['Strength'].default_value = 2.2
+# lens: green light falling off from a bright core to black (radial ramp on object coords)
+M_LENSE, nt, out = emission_mat('eye_lens')
 tc = nt.nodes.new('ShaderNodeTexCoord'); grad = nt.nodes.new('ShaderNodeTexGradient'); grad.gradient_type = 'SPHERICAL'
-pw = nt.nodes.new('ShaderNodeMath'); pw.operation = 'POWER'; pw.inputs[1].default_value = 3.0
-sc = nt.nodes.new('ShaderNodeMath'); sc.operation = 'MULTIPLY'; sc.inputs[1].default_value = 0.85
-nt.links.new(tc.outputs['Object'], grad.inputs['Vector'])
-nt.links.new(grad.outputs['Fac'], pw.inputs[0]); nt.links.new(pw.outputs[0], sc.inputs[0])
-nt.links.new(sc.outputs[0], mix.inputs['Fac']); nt.links.new(tr.outputs[0], mix.inputs[1]); nt.links.new(em.outputs[0], mix.inputs[2])
-nt.links.new(mix.outputs[0], o.inputs['Surface'])
-bpy.ops.mesh.primitive_circle_add(vertices=96, radius=1.0, fill_type='NGON', location=(0, T / 2 + 0.0009, MARK_Z), rotation=(math.radians(-90), 0, 0))
-halo = bpy.context.object; halo.name = 'halo'; halo.scale = (0.2, 0.2, 1); halo.data.materials.append(M_HALO)
+mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1.0, 1.0, 1.0)
+ramp = nt.nodes.new('ShaderNodeValToRGB'); cr = ramp.color_ramp
+stops = [(0.00, '#0b3020'), (0.18, '#0d4a2c'), (0.40, '#10a052'), (0.68, '#3ce886'), (0.88, '#c6ffdf'), (1.00, '#ffffff')]
+cr.elements[0].position, cr.elements[0].color = stops[0][0], (*srgb(stops[0][1]), 1)
+cr.elements[1].position, cr.elements[1].color = stops[-1][0], (*srgb(stops[-1][1]), 1)
+for pos, col in stops[1:-1]:
+    e = cr.elements.new(pos); e.color = (*srgb(col), 1)
+em = nt.nodes.new('ShaderNodeEmission'); em.inputs['Strength'].default_value = 1.15
+nt.links.new(tc.outputs['Object'], mp.inputs['Vector']); nt.links.new(mp.outputs['Vector'], grad.inputs['Vector'])
+nt.links.new(grad.outputs['Fac'], ramp.inputs['Fac']); nt.links.new(ramp.outputs['Color'], em.inputs['Color'])
+lmix = nt.nodes.new('ShaderNodeMixShader'); ltr = nt.nodes.new('ShaderNodeBsdfTransparent')
+lpw = nt.nodes.new('ShaderNodeMath'); lpw.operation = 'POWER'; lpw.inputs[1].default_value = 0.6
+nt.links.new(grad.outputs['Fac'], lpw.inputs[0]); nt.links.new(lpw.outputs[0], lmix.inputs['Fac'])
+nt.links.new(ltr.outputs[0], lmix.inputs[1]); nt.links.new(em.outputs[0], lmix.inputs[2])
+nt.links.new(lmix.outputs[0], out.inputs['Surface']); M_LENSE.blend_method = 'BLEND'
+bpy.ops.mesh.primitive_circle_add(vertices=128, radius=1.0, fill_type='NGON', location=(0, EY + 0.0045, MARK_Z), rotation=(math.radians(-90), 0, 0))
+lens = bpy.context.object; lens.name = 'eye_lens'; lens.scale = (ER, ER, 1); lens.data.materials.append(M_LENSE)
+lens.visible_shadow = False; parts.append(lens)
+
+# dome: clear glass cover over the lens, catches the studio highlight
+bpy.ops.mesh.primitive_uv_sphere_add(segments=96, ring_count=48, radius=1.0, location=(0, EY + 0.0040, MARK_Z))
+dome = bpy.context.object; dome.name = 'eye_dome'; dome.scale = (ER + 0.004, 0.014, ER + 0.004)
+bpy.ops.object.shade_smooth()
+M_DOME = bpy.data.materials.new('dome'); M_DOME.use_nodes = True
+db = M_DOME.node_tree.nodes['Principled BSDF']
+db.inputs['Base Color'].default_value = (1, 1, 1, 1); db.inputs['Roughness'].default_value = 0.0
+db.inputs['Transmission Weight'].default_value = 1.0; db.inputs['IOR'].default_value = 1.45
+dome.data.materials.append(M_DOME); dome.visible_shadow = False; parts.append(dome)
+
+# halo: light glowing through the frosted back glass, wide and soft
+M_HALO, nt, out = emission_mat('halo'); M_HALO.blend_method = 'BLEND'
+mix = nt.nodes.new('ShaderNodeMixShader'); tr = nt.nodes.new('ShaderNodeBsdfTransparent'); hem = nt.nodes.new('ShaderNodeEmission')
+hem.inputs['Color'].default_value = (*srgb('#2bd36f'), 1); hem.inputs['Strength'].default_value = 2.0
+tc = nt.nodes.new('ShaderNodeTexCoord'); grad = nt.nodes.new('ShaderNodeTexGradient'); grad.gradient_type = 'SPHERICAL'
+pw = nt.nodes.new('ShaderNodeMath'); pw.operation = 'POWER'; pw.inputs[1].default_value = 2.6
+sc = nt.nodes.new('ShaderNodeMath'); sc.operation = 'MULTIPLY'; sc.inputs[1].default_value = 0.8
+nt.links.new(tc.outputs['Object'], grad.inputs['Vector']); nt.links.new(grad.outputs['Fac'], pw.inputs[0]); nt.links.new(pw.outputs[0], sc.inputs[0])
+nt.links.new(sc.outputs[0], mix.inputs['Fac']); nt.links.new(tr.outputs[0], mix.inputs[1]); nt.links.new(hem.outputs[0], mix.inputs[2])
+nt.links.new(mix.outputs[0], out.inputs['Surface'])
+bpy.ops.mesh.primitive_circle_add(vertices=128, radius=1.0, fill_type='NGON', location=(0, EY + 0.0004, MARK_Z), rotation=(math.radians(-90), 0, 0))
+halo = bpy.context.object; halo.name = 'halo'; halo.scale = (0.34, 0.34, 1); halo.data.materials.append(M_HALO)
 halo.visible_shadow = False; parts.append(halo)
 # side buttons on the right edge (-X when viewed from the front faces... front is -Y, so viewer's right is +X)
 for nm, z, ln in (('vol', 0.33, 0.20), ('pwr', 0.02, 0.10)):
@@ -229,7 +258,7 @@ ease = lambda t: 0.5 - 0.5 * math.cos(math.pi * t)
 if MODE == 'dbg':
     sc = screen(os.path.join(SCREENS, 'screen-home.png')); sc.parent = rig
     aim((0, -7.2, 0.35)); pose(200)
-    scene.render.use_border = True; scene.render.border_min_x, scene.render.border_max_x = 0.25, 0.75; scene.render.border_min_y, scene.render.border_max_y = 0.25, 0.65
+    scene.render.use_border = True; scene.render.border_min_x, scene.render.border_max_x = 0.25, 0.75; scene.render.border_min_y, scene.render.border_max_y = 0.3, 0.62
     scene.render.use_crop_to_border = True
     render(os.path.join(OUT, 'dbg.png'), res=(1000, 1250), samples=96)
 elif MODE == 'preview':
