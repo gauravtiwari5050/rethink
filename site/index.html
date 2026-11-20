@@ -172,6 +172,30 @@ sup.fn a { text-decoration: none; }
 .fig span { max-width: 52ch; }
 .fig.left { justify-content: flex-start; }
 
+/* hero turntable */
+#hero { height: 320vh; background: var(--bg); }
+#hero .pin { display: block; }
+.hero-copy { position: absolute; inset: 0 0 auto; padding-top: clamp(40px, 7vh, 90px); padding-left: var(--gut-l); padding-right: var(--gut-r); text-align: center; display: flex; flex-direction: column; align-items: center; z-index: 2; will-change: transform, opacity; }
+.hero-copy h1 { font-size: clamp(3.2rem, min(10vw, 13vh), 9rem); font-weight: 500; line-height: 0.92; letter-spacing: -0.06em; margin-top: 18px; }
+.hero-copy .lead { margin: 22px auto 0; text-align: center; max-width: 32ch; }
+.hero-copy .ctas { display: flex; gap: 26px; align-items: center; justify-content: center; margin-top: 26px; flex-wrap: wrap; }
+.turn { position: absolute; left: 50%; top: 50%; width: min(67svh, 96vw, 690px); aspect-ratio: 4 / 5; transform: translate(-50%, calc(-50% + (1 - var(--k, 0)) * 52svh)) scale(calc(0.86 + 0.14 * var(--k, 0))); will-change: transform; z-index: 1; }
+.turn img, .turn canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.turn canvas { opacity: 0; }
+.turn.live canvas { opacity: 1; }
+.turn.live img { visibility: hidden; }
+.callout { position: absolute; width: 15em; display: grid; gap: 6px; padding-top: 12px; border-top: 1px solid var(--fg); font-size: 0.88rem; line-height: 1.45; color: var(--mute); opacity: 0; transform: translateY(14px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.callout b { font: 500 1.5rem/1 var(--font-display); letter-spacing: -0.03em; color: var(--fg); }
+.callout.on { opacity: 1; transform: none; }
+.c1 { right: 100%; top: 38%; margin-right: -4%; }
+.c2 { left: 100%; top: 30%; margin-left: -6%; }
+.hero-fig { position: absolute; left: 0; right: 0; bottom: 18px; margin: 0; padding-inline: 16px; opacity: 0; transition: opacity .6s var(--ease); }
+.hero-fig.on { opacity: 1; }
+@media (max-width: 900px) {
+  .c1, .c2 { left: 50%; right: auto; top: auto; bottom: 4%; margin: 0; transform: translate(-50%, 14px); background: color-mix(in srgb, var(--bg) 88%, transparent); padding: 12px 14px; width: min(18em, 80vw); }
+  .callout.on { transform: translate(-50%, 0); }
+}
+
 /* ---------- scenes ---------- */
 .scene { position: relative; }
 .scene > .pin { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; overflow: hidden; }
@@ -408,6 +432,7 @@ canvas#scope { width: 100%; height: 120px; display: block; }
 .finale .wrap { position: relative; display: grid; justify-items: center; gap: 26px; }
 .finale h2 { font-size: clamp(3.2rem, 11vw, 9rem); font-weight: 500; line-height: 0.92; letter-spacing: -0.06em; }
 .finale .lead { text-align: center; }
+.flat { width: min(760px, 100%); height: auto; margin: -40px 0 -30px; }
 .founder { display: flex; align-items: center; gap: 14px; text-align: left; margin-top: 10px; }
 .founder i { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); display: grid; place-items: center; font: 600 1.1rem var(--font-display); font-style: normal; flex: none; }
 .founder span { font-size: 0.92rem; color: var(--mute); line-height: 1.4; }
@@ -439,6 +464,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
   <div class="wrap">
     <a class="brand" href="#top" aria-label="Rethink Phone home"><svg class="mark" viewBox="0 0 14 22" aria-hidden="true"><rect x="0.8" y="0.8" width="12.4" height="20.4" rx="3.2"/><circle cx="7" cy="11" r="2.6"/></svg>Rethink</a>
     <nav aria-label="Sections">
+      <a href="#hero">Design</a>
       <a href="#story">Why</a>
       <a href="#principles">Principles</a>
       <a href="#answer">Calls</a>
@@ -454,35 +480,24 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <main id="top">
 
 <!-- ================= HERO ================= -->
-<section class="hero">
-  <div class="wrap">
-    <p class="eyebrow in" style="animation-delay:.05s">Rethink Phone</p>
-    <h1><span class="ln"><span style="animation-delay:.12s">A new kind</span></span><span class="ln"><span style="animation-delay:.24s">of <span class="sheen">phone.</span></span></span></h1>
-    <p class="lead in" style="animation-delay:.35s">We took the phone apart and asked what it’s actually for. Then we rebuilt it <b>from first principles</b>, around one assistant that works for you.</p>
-    <div class="ctas in" style="animation-delay:.5s">
-      <a class="pill big ink" href="#story">Watch the story</a>
-      <a class="link" href="#hear">Hear it answer a real call ›</a>
-    </div>
-
-    <div class="hero-stage" id="heroStage">
-      <div class="phone-in">
-        <div class="phone" aria-label="Rethink home screen: no app grid, one assistant and a summary of what it handled">
-          <div class="screen">
-            <div class="sb"><span>18:20</span><span>5G ▮▮▮</span></div>
-            <div class="layer home">
-              <div class="greet">Good evening, Gaurav.<span>Here’s what I handled today.</span></div>
-              <div class="orb" aria-hidden="true"></div>
-              <div class="hcards">
-                <div class="hcard"><b>2 calls answered</b><span>Rahul: dinner moved to Friday. Clinic: Tuesday 4:30 confirmed.</span></div>
-                <div class="hcard"><b>WhatsApp · 6 messages</b><span>Nothing urgent. Ma asked if you’re coming Sunday.</span></div>
-              </div>
-              <div class="ask"><i></i>Ask Rethink anything</div>
-            </div>
-          </div>
-        </div>
+<section class="scene" id="hero" data-scene="hero">
+  <div class="pin">
+    <div class="hero-copy" id="heroCopy">
+      <p class="eyebrow in" style="animation-delay:.05s">Rethink Phone</p>
+      <h1><span class="ln"><span style="animation-delay:.12s">A new kind</span></span><span class="ln"><span style="animation-delay:.24s">of <span class="sheen">phone.</span></span></span></h1>
+      <p class="lead in" style="animation-delay:.4s">We took the phone apart and asked what it’s actually for. Then we rebuilt it <b>from first principles</b>, around one assistant that works for you.</p>
+      <div class="ctas in" style="animation-delay:.55s">
+        <a class="pill big" href="#story">Watch the story</a>
+        <a class="link" href="#hear">Hear it answer a real call</a>
       </div>
     </div>
-    <p class="fig"><b>Fig. 1</b><span>Rethink home. No grid of apps: one assistant, and a summary of what it handled while you were busy.</span></p>
+    <div class="turn" id="turn">
+      <img id="turnImg" src="assets/phone/f000.webp" width="800" height="1000" alt="Rethink Phone concept render. The home screen shows one assistant and a summary of the calls it answered.">
+      <canvas id="turnCv" width="800" height="1000" aria-hidden="true"></canvas>
+      <p class="callout c1" id="c1"><b>8.7 mm</b><span>Bead‑blasted aluminium frame. Nothing to fidget with.</span></p>
+      <p class="callout c2" id="c2"><b>One light</b><span>It glows green while Rethink is handling a call for you.</span></p>
+    </div>
+    <p class="fig hero-fig" id="heroFig"><b>Fig. 1</b><span>Concept render of Rethink hardware. The software runs today on a OnePlus Nord CE 3 Lite.<sup class="fn"><a href="#fn5">5</a></sup></span></p>
   </div>
 </section>
 
@@ -907,6 +922,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <!-- ================= FINALE ================= -->
 <section class="finale">
   <div class="wrap">
+    <img class="flat reveal" src="assets/phone/flat.webp" width="1400" height="1374" alt="Rethink Phone lying face up while Rethink answers an incoming call from Rahul Mehta" loading="lazy">
     <p class="eyebrow">Rethink Phone</p>
     <h2>The phone,<br><span class="sheen">rethought.</span></h2>
     <p class="lead">Answering real calls on a OnePlus Nord CE 3 Lite since 18 November 2026.<sup class="fn"><a href="#fn5">5</a></sup></p>
@@ -1020,8 +1036,34 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
   }
 
   /* scroll engine */
-  const heroStage = document.getElementById('heroStage');
+  const hero = document.getElementById('hero'), turn = document.getElementById('turn');
+  const turnCv = document.getElementById('turnCv'), tctx = turnCv.getContext('2d');
+  const heroCopy = document.getElementById('heroCopy'), heroFig = document.getElementById('heroFig');
+  const c1 = document.getElementById('c1'), c2 = document.getElementById('c2');
+  const NF = 48, frames = new Array(NF);
+  let shown = -1, want = 0;
+  const paint = (i) => {
+    let j = i; while (j > 0 && !(frames[j] && frames[j].complete && frames[j].naturalWidth)) j--;
+    const im = frames[j]; if (!im || !im.complete || !im.naturalWidth || j === shown) return;
+    tctx.clearRect(0, 0, turnCv.width, turnCv.height); tctx.drawImage(im, 0, 0, turnCv.width, turnCv.height);
+    shown = j; turn.classList.add('live');
+  };
+  const load = (i) => { const im = new Image(); im.decoding = 'async'; im.src = `assets/phone/f${String(i).padStart(3, '0')}.webp`; im.onload = () => { if (i <= want) { shown = -1; paint(want); } }; frames[i] = im; };
+  load(0); window.requestIdleCallback ? window.requestIdleCallback(() => { for (let i = 1; i < NF; i++) load(i); }) : setTimeout(() => { for (let i = 1; i < NF; i++) load(i); }, 300);
+  function heroScene(p) {
+    const k = clamp(p / 0.26);
+    turn.style.setProperty('--k', reduce ? 1 : (1 - Math.pow(1 - k, 3)).toFixed(4));
+    heroCopy.style.opacity = (1 - clamp(p / 0.16)).toFixed(3);
+    heroCopy.style.transform = `translateY(${(-p * 260).toFixed(1)}px)`;
+    heroCopy.style.visibility = p > 0.2 ? 'hidden' : 'visible';
+    const r = clamp((p - 0.24) / 0.62);
+    want = Math.round(r * (NF - 1)); paint(want);
+    c1.classList.toggle('on', want >= 17 && want <= 31);
+    c2.classList.toggle('on', want >= 40);
+    heroFig.classList.toggle('on', k > 0.6);
+  }
   const scenes = [
+    [hero, heroScene],
     [story, storyScene],
     [document.getElementById('statement'), (p) => { const k = Math.round(clamp(p * 1.25) * wordSpans.length); wordSpans.forEach((s, i) => s.classList.toggle('lit', i < k)); }],
     [answer, answerScene],
@@ -1031,7 +1073,6 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
   function frame() {
     ticking = false;
     const vh = innerHeight;
-    heroStage.style.setProperty('--hp', clamp(1 - (heroStage.getBoundingClientRect().top - vh * 0.25) / (vh * 0.6)));
     for (const [el, fn] of scenes) {
       const r = el.getBoundingClientRect(), span = r.height - vh;
       fn(span > 0 ? clamp(-r.top / span) : 0);
