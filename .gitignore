@@ -1,0 +1,9 @@
+flash/
+research/device-dump/
+probe/build/
+probe/out/
+*.dex
+.DS_Store
+node_modules/
+.env
+bridge/calls/
