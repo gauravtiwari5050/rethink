@@ -6,7 +6,7 @@ The launch page and experiments. It's a static site: `npm run build` writes ever
 |---|---|
 | `index.html` | The launch page. Edit this file; it also previews on its own. |
 | `assets/` | Renders, frame sequences, the call recording, `experiments.css`, favicon, social image |
-| `experiments/NN-slug.md` | Blog posts in Markdown |
+| `experiments/NN-slug.md` | Experiments in Markdown, one per feature |
 | `build.mjs` | Wraps the page in a full HTML document, builds the experiments, RSS feed, sitemap, robots.txt and 404 |
 | `render/` | Blender 5.2.1 script that renders the concept hardware (`blender -b -P render/phone.py -- <mode> <out>`) |
 
