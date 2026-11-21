@@ -131,66 +131,57 @@ def screen(path):
     sc.data.materials.append(screen_mat(path))
     return sc
 
-# camera module (back, top-left when viewed from the back = +X in world since back faces +Y)
-by = T / 2 + 0.006
-for i, z in enumerate((0.60, 0.42)):
-    parts.append(cyl(f'ring{i}', 0.072, 0.012, (0.19, by, z), M_RING))
-    parts.append(cyl(f'lens{i}', 0.056, 0.014, (0.19, by + 0.001, z), M_LENS))
-parts.append(cyl('flash', 0.018, 0.006, (0.05, T / 2 + 0.002, 0.60), mat('flash', srgb('#e9e4d4'), rough=0.3)))
-# the Rethink dot: a single polished disc, the phone's only mark
-# ---------- the eye: a lens-like status light, set into the back glass ----------
-MARK_Z = 0.02
+# ---------- back: one camera lens, ringed by the light; a teletype display below ----------
 EY = T / 2                      # back surface
-ER = 0.088                      # lens radius
+CAM_Z = 0.50                    # camera centre, on the centre line
+CR = 0.060                      # camera glass radius
 def emission_mat(name):
     m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
     return m, nt, nt.nodes.new('ShaderNodeOutputMaterial')
+def ramp_set(cr, stops):
+    cr.elements[0].position, cr.elements[0].color = stops[0][0], stops[0][1]
+    cr.elements[1].position, cr.elements[1].color = stops[-1][0], stops[-1][1]
+    for pos, col in stops[1:-1]:
+        e = cr.elements.new(pos); e.color = col
 
-# lens: green light falling off from a bright core to black (radial ramp on object coords)
-M_LENSE, nt, out = emission_mat('eye_lens')
+# camera: black glass barrel, a coated inner element, and a thin dark bezel
+M_BEZEL = mat('bezel', srgb('#1a1c1f'), metallic=1.0, rough=0.25)
+parts.append(cyl('cam_bezel', CR + 0.004, 0.010, (0, EY + 0.002, CAM_Z), M_BEZEL))
+parts.append(cyl('cam_glass', CR, 0.012, (0, EY + 0.0035, CAM_Z), M_LENS))
+M_ELEM = mat('elem', srgb('#0c1424'), metallic=0.0, rough=0.05, coat=1.0, coat_rough=0.0)
+parts.append(cyl('cam_elem', CR * 0.52, 0.002, (0, EY + 0.0090, CAM_Z), M_ELEM))
+parts.append(cyl('cam_core', CR * 0.22, 0.002, (0, EY + 0.0098, CAM_Z), mat('core', srgb('#020203'), rough=0.02, coat=1.0)))
+
+# the light: a ring that hugs the lens and bleeds outward through the frosted glass
+LS = 0.36                       # outer reach of the glow
+M_RINGL, nt, out = emission_mat('lightring'); M_RINGL.blend_method = 'BLEND'
 tc = nt.nodes.new('ShaderNodeTexCoord'); grad = nt.nodes.new('ShaderNodeTexGradient'); grad.gradient_type = 'SPHERICAL'
-mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1.0, 1.0, 1.0)
-ramp = nt.nodes.new('ShaderNodeValToRGB'); cr = ramp.color_ramp
-stops = [(0.00, '#0b3020'), (0.18, '#0d4a2c'), (0.40, '#10a052'), (0.68, '#3ce886'), (0.88, '#c6ffdf'), (1.00, '#ffffff')]
-cr.elements[0].position, cr.elements[0].color = stops[0][0], (*srgb(stops[0][1]), 1)
-cr.elements[1].position, cr.elements[1].color = stops[-1][0], (*srgb(stops[-1][1]), 1)
-for pos, col in stops[1:-1]:
-    e = cr.elements.new(pos); e.color = (*srgb(col), 1)
-em = nt.nodes.new('ShaderNodeEmission'); em.inputs['Strength'].default_value = 1.15
-nt.links.new(tc.outputs['Object'], mp.inputs['Vector']); nt.links.new(mp.outputs['Vector'], grad.inputs['Vector'])
-nt.links.new(grad.outputs['Fac'], ramp.inputs['Fac']); nt.links.new(ramp.outputs['Color'], em.inputs['Color'])
-lmix = nt.nodes.new('ShaderNodeMixShader'); ltr = nt.nodes.new('ShaderNodeBsdfTransparent')
-lpw = nt.nodes.new('ShaderNodeMath'); lpw.operation = 'POWER'; lpw.inputs[1].default_value = 0.6
-nt.links.new(grad.outputs['Fac'], lpw.inputs[0]); nt.links.new(lpw.outputs[0], lmix.inputs['Fac'])
-nt.links.new(ltr.outputs[0], lmix.inputs[1]); nt.links.new(em.outputs[0], lmix.inputs[2])
-nt.links.new(lmix.outputs[0], out.inputs['Surface']); M_LENSE.blend_method = 'BLEND'
-bpy.ops.mesh.primitive_circle_add(vertices=128, radius=1.0, fill_type='NGON', location=(0, EY + 0.0045, MARK_Z), rotation=(math.radians(-90), 0, 0))
-lens = bpy.context.object; lens.name = 'eye_lens'; lens.scale = (ER, ER, 1); lens.data.materials.append(M_LENSE)
-lens.visible_shadow = False; parts.append(lens)
-
-# dome: clear glass cover over the lens, catches the studio highlight
-bpy.ops.mesh.primitive_uv_sphere_add(segments=96, ring_count=48, radius=1.0, location=(0, EY + 0.0040, MARK_Z))
-dome = bpy.context.object; dome.name = 'eye_dome'; dome.scale = (ER + 0.004, 0.014, ER + 0.004)
-bpy.ops.object.shade_smooth()
-M_DOME = bpy.data.materials.new('dome'); M_DOME.use_nodes = True
-db = M_DOME.node_tree.nodes['Principled BSDF']
-db.inputs['Base Color'].default_value = (1, 1, 1, 1); db.inputs['Roughness'].default_value = 0.0
-db.inputs['Transmission Weight'].default_value = 1.0; db.inputs['IOR'].default_value = 1.45
-dome.data.materials.append(M_DOME); dome.visible_shadow = False; parts.append(dome)
-
-# halo: light glowing through the frosted back glass, wide and soft
-M_HALO, nt, out = emission_mat('halo'); M_HALO.blend_method = 'BLEND'
-mix = nt.nodes.new('ShaderNodeMixShader'); tr = nt.nodes.new('ShaderNodeBsdfTransparent'); hem = nt.nodes.new('ShaderNodeEmission')
-hem.inputs['Color'].default_value = (*srgb('#2bd36f'), 1); hem.inputs['Strength'].default_value = 2.0
-tc = nt.nodes.new('ShaderNodeTexCoord'); grad = nt.nodes.new('ShaderNodeTexGradient'); grad.gradient_type = 'SPHERICAL'
-pw = nt.nodes.new('ShaderNodeMath'); pw.operation = 'POWER'; pw.inputs[1].default_value = 2.6
-sc = nt.nodes.new('ShaderNodeMath'); sc.operation = 'MULTIPLY'; sc.inputs[1].default_value = 0.8
-nt.links.new(tc.outputs['Object'], grad.inputs['Vector']); nt.links.new(grad.outputs['Fac'], pw.inputs[0]); nt.links.new(pw.outputs[0], sc.inputs[0])
-nt.links.new(sc.outputs[0], mix.inputs['Fac']); nt.links.new(tr.outputs[0], mix.inputs[1]); nt.links.new(hem.outputs[0], mix.inputs[2])
-nt.links.new(mix.outputs[0], out.inputs['Surface'])
-bpy.ops.mesh.primitive_circle_add(vertices=128, radius=1.0, fill_type='NGON', location=(0, EY + 0.0004, MARK_Z), rotation=(math.radians(-90), 0, 0))
-halo = bpy.context.object; halo.name = 'halo'; halo.scale = (0.34, 0.34, 1); halo.data.materials.append(M_HALO)
+rp = nt.nodes.new('ShaderNodeValToRGB')
+inner = 1 - (CR + 0.004) / LS   # fac at the bezel edge
+g = lambda h, a: (*srgb(h), a)
+ramp_set(rp.color_ramp, [(0.00, g('#0b3020', 0.0)), (0.30, g('#12a656', 0.14)), (0.55, g('#2bd36f', 0.42)), (0.72, g('#3ce886', 0.62)),
+                         (inner - 0.035, g('#3ce886', 0.9)), (inner - 0.012, g('#c6ffdf', 1.0)), (inner - 0.004, g('#ffffff', 1.0)), (inner, g('#ffffff', 0.0)), (1.0, g('#ffffff', 0.0))])
+em = nt.nodes.new('ShaderNodeEmission'); em.inputs['Strength'].default_value = 1.6
+mix = nt.nodes.new('ShaderNodeMixShader'); tr = nt.nodes.new('ShaderNodeBsdfTransparent')
+nt.links.new(tc.outputs['Object'], grad.inputs['Vector']); nt.links.new(grad.outputs['Fac'], rp.inputs['Fac'])
+nt.links.new(rp.outputs['Color'], em.inputs['Color']); nt.links.new(rp.outputs['Alpha'], mix.inputs['Fac'])
+nt.links.new(tr.outputs[0], mix.inputs[1]); nt.links.new(em.outputs[0], mix.inputs[2]); nt.links.new(mix.outputs[0], out.inputs['Surface'])
+bpy.ops.mesh.primitive_circle_add(vertices=160, radius=1.0, fill_type='NGON', location=(0, EY + 0.0006, CAM_Z), rotation=(math.radians(-90), 0, 0))
+halo = bpy.context.object; halo.name = 'halo'; halo.scale = (LS, LS, 1); halo.data.materials.append(M_RINGL)
 halo.visible_shadow = False; parts.append(halo)
+
+# teletype: a strip of black glass showing what the assistant hears and thinks
+TW, TH, TZ = 0.58, 0.58 * 700 / 1200, -0.08
+plate = slab('tele_plate', TW + 0.03, TH + 0.03, 0.0016, 0.03, seg=12, material=mat('tele', srgb('#010101'), rough=0.08, coat=0.25, coat_rough=0.02, spec=0.2))
+plate.location = (0, EY + 0.0002, TZ); parts.append(plate)
+M_TELE = bpy.data.materials.new('teletext'); M_TELE.use_nodes = True; tnt = M_TELE.node_tree; tb = tnt.nodes['Principled BSDF']
+tb.inputs['Base Color'].default_value = (0, 0, 0, 1); tb.inputs['Roughness'].default_value = 0.03
+tb.inputs['Coat Weight'].default_value = 0.0; tb.inputs['Specular IOR Level'].default_value = 0.15
+ttex = tnt.nodes.new('ShaderNodeTexImage'); ttex.image = bpy.data.images.load(os.path.join(SCREENS, 'screen-tele.png')); ttex.interpolation = 'Cubic'
+tnt.links.new(ttex.outputs['Color'], tb.inputs['Emission Color']); tb.inputs['Emission Strength'].default_value = 1.7
+# plane faces +Y; flip X so text reads correctly from behind
+bpy.ops.mesh.primitive_plane_add(size=1, location=(0, EY + 0.0012, TZ), rotation=(math.radians(-90), 0, math.radians(180)))
+tele = bpy.context.object; tele.name = 'tele'; tele.scale = (TW, -TH, 1); tele.data.materials.append(M_TELE); parts.append(tele)
 # side buttons on the right edge (-X when viewed from the front faces... front is -Y, so viewer's right is +X)
 for nm, z, ln in (('vol', 0.33, 0.20), ('pwr', 0.02, 0.10)):
     b = slab(nm, 0.012, ln, 0.026, 0.006, seg=8, material=M_BTN)
@@ -277,6 +268,56 @@ elif MODE == 'seq':
         pose(-24 + t * (200 + 24), tilt_deg=-4 + 2 * math.sin(math.pi * t))
         render(os.path.join(OUT, f'f{i:03d}.png'), samples=int(argv[3]) if len(argv) > 3 else 96)
 
+elif MODE == 'backface':
+    # straight-on back for the page: teletype left dark so the page can type into it live
+    from bpy_extras.object_utils import world_to_camera_view
+    import json
+    if 'blank' in argv:
+        bpy.data.materials['teletext'].node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value = 0.0
+    pose(180, tilt_deg=0)
+    aim((0, -7.6, 0.0), target=(0, 0, 0.0))
+    res = (1100, 1700)
+    scene.render.resolution_x, scene.render.resolution_y = res
+    bpy.context.view_layer.update()
+    mw = tele.matrix_world
+    pts = [world_to_camera_view(scene, cam, mw @ Vector((x, y, 0))) for x, y in ((-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5))]
+    xs = [p.x for p in pts]; ys = [1 - p.y for p in pts]
+    pts2 = [world_to_camera_view(scene, cam, halo.matrix_world @ Vector((0, 0, 0)))]
+    json.dump({'tele': [min(xs), min(ys), max(xs), max(ys)], 'lens': [pts2[0].x, 1 - pts2[0].y], 'res': res}, open(os.path.join(OUT, 'backface.json'), 'w'))
+    render(os.path.join(OUT, 'backface.png'), res=res, samples=int(argv[2]) if len(argv) > 2 and argv[2].isdigit() else 160)
+
+elif MODE == 'flip':
+    # answer scene: ringing front, flips to the back as the light comes on. Same camera and crop as backface.
+    # argv: flip <outdir> <frames> <samples> [t-list]   (t > 1 renders the back with the light off, for the brief)
+    n = int(argv[2]); samples = int(argv[3])
+    ts = [float(x) for x in argv[4].split(',')] if len(argv) > 4 else [i / (n - 1) for i in range(n)]
+    sc = screen(os.path.join(SCREENS, 'screen-ring.png')); sc.parent = rig
+    bpy.data.materials['teletext'].node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value = 0.0
+    lnt = M_RINGL.node_tree
+    kmul = lnt.nodes.new('ShaderNodeMath'); kmul.operation = 'MULTIPLY'
+    mixn = [nd for nd in lnt.nodes if nd.type == 'MIX_SHADER'][0]
+    rpn = [nd for nd in lnt.nodes if nd.type == 'VALTORGB'][0]
+    lnt.links.new(rpn.outputs['Alpha'], kmul.inputs[0]); lnt.links.new(kmul.outputs[0], mixn.inputs['Fac'])
+    emn = [nd for nd in lnt.nodes if nd.type == 'EMISSION'][0]
+    aim((0, -7.6, 0.0), target=(0, 0, 0.0))
+    floor.visible_glossy = False   # the shadow catcher reflects as a grey band in the front glass when seen straight on
+    scene.render.resolution_x, scene.render.resolution_y = 1100, 1700
+    scene.render.use_border = True; scene.render.use_crop_to_border = True
+    scene.render.border_min_x, scene.render.border_max_x = 240 / 1100, 860 / 1100
+    scene.render.border_min_y, scene.render.border_max_y = 1 - 1460 / 1700, 1 - 230 / 1700
+    smooth = lambda e0, e1, x: (lambda k: k * k * (3 - 2 * k))(min(1, max(0, (x - e0) / (e1 - e0))))
+    for i, t in enumerate(ts):
+        if t > 1:
+            k = 0.0; yaw = 180; name = 'flip-off.png'
+        else:
+            e = 0.5 - 0.5 * math.cos(math.pi * t)
+            yaw = 180 * e; k = smooth(0.35, 0.95, t); name = f'g{i:03d}.png'
+        kmul.inputs[1].default_value = k
+        emn.inputs['Strength'].default_value = 1.6 * (0.4 + 0.6 * k)
+        # a slight lift and lean mid-turn so the edge reads
+        pose(yaw, tilt_deg=-3 * math.sin(math.pi * min(t, 1)))
+        render(os.path.join(OUT, name), res=(1100, 1700), samples=samples)
+
 elif MODE == 'flat':
     for o in scene.objects:
         if o.type == 'LIGHT': o.visible_glossy = False
@@ -287,3 +328,97 @@ elif MODE == 'flat':
     aim((1.2, -4.4, 5.4), target=(0, 0, rig.location.z))
     cam_d.lens = 85
     render(os.path.join(OUT, 'flat.png'), res=(1600, 1200), samples=160)
+
+elif MODE == 'meld':
+    # apps melt into one green light. argv: meld <outdir> <frames> <samples> [t-list for preview]
+    n = int(argv[2]); samples = int(argv[3])
+    ts = [float(x) for x in argv[4].split(',')] if len(argv) > 4 else [i / (n - 1) for i in range(n)]
+    smooth = lambda e0, e1, x: (lambda k: k * k * (3 - 2 * k))(min(1, max(0, (x - e0) / (e1 - e0))))
+
+    # screen: busy wallpaper fading to black with t
+    bpy.ops.mesh.primitive_plane_add(size=1, location=(0, -(T / 2) - 0.0002, 0.01), rotation=(math.radians(90), 0, 0))
+    scr = bpy.context.object; scr.scale = (SW, SH, 1); scr.parent = rig
+    sm = bpy.data.materials.new('meldscreen'); sm.use_nodes = True; snt = sm.node_tree; sb = snt.nodes['Principled BSDF']
+    sb.inputs['Base Color'].default_value = (0, 0, 0, 1); sb.inputs['Roughness'].default_value = 0.02
+    sb.inputs['Coat Weight'].default_value = 1.0; sb.inputs['Coat Roughness'].default_value = 0.01
+    stex = snt.nodes.new('ShaderNodeTexImage'); stex.image = bpy.data.images.load(os.path.join(SCREENS, 'wall-busy.png'))
+    sk = snt.nodes.new('ShaderNodeValue'); smix = snt.nodes.new('ShaderNodeMix'); smix.data_type = 'RGBA'
+    smix.inputs['B'].default_value = (0.0, 0.0, 0.0, 1)
+    snt.links.new(sk.outputs[0], smix.inputs['Factor']); snt.links.new(stex.outputs['Color'], smix.inputs['A'])
+    snt.links.new(smix.outputs['Result'], sb.inputs['Emission Color']); sb.inputs['Emission Strength'].default_value = 0.9
+    scr.data.materials.append(sm)
+
+    # metaball icons on the glass
+    mb = bpy.data.metaballs.new('apps'); mb.resolution = 0.02; mb.render_resolution = 0.0035; mb.threshold = 0.6
+    mbo = bpy.data.objects.new('apps', mb); scene.collection.objects.link(mbo); mbo.parent = rig
+    mbo.location = (0, -(T / 2) - 0.004, 0.01); mbo.rotation_euler = (math.radians(90), 0, 0)
+    icons = []
+    for r in range(6):
+        for c in range(4):
+            icons.append(((c - 1.5) * 0.165, 0.50 - r * 0.175))
+    for c in range(4):
+        icons.append(((c - 1.5) * 0.165, -0.60))
+    els = []
+    for (x, y) in icons:
+        e = mb.elements.new(type='CUBE'); e.co = (x, y, 0); e.radius = 0.052; e.stiffness = 4.0
+        e.size_x = e.size_y = 0.022; e.size_z = 0.004; els.append(e)
+
+    # material: app colours by angle around the centre, turning green near the centre and as t rises
+    am = bpy.data.materials.new('apps'); am.use_nodes = True; ant = am.node_tree; ab = ant.nodes['Principled BSDF']
+    ab.inputs['Roughness'].default_value = 0.12; ab.inputs['Coat Weight'].default_value = 1.0; ab.inputs['Coat Roughness'].default_value = 0.02
+    tc = ant.nodes.new('ShaderNodeTexCoord')
+    rad = ant.nodes.new('ShaderNodeTexGradient'); rad.gradient_type = 'RADIAL'
+    hue = ant.nodes.new('ShaderNodeValToRGB'); hr = hue.color_ramp
+    cols = ['#ff9f0a', '#0a84ff', '#ff375f', '#64d2ff', '#ffd60a', '#bf5af2', '#30d158', '#ff6b3d', '#5e5ce6', '#ff453a', '#32ade6', '#ffcc00', '#af52de', '#34c759']
+    hr.elements[0].position, hr.elements[0].color = 0.0, (*srgb(cols[0]), 1)
+    hr.elements[1].position, hr.elements[1].color = 1.0, (*srgb(cols[0]), 1)
+    for i, cc in enumerate(cols[1:], 1):
+        e = hr.elements.new(i / len(cols)); e.color = (*srgb(cc), 1)
+    hr.interpolation = 'CONSTANT'
+    sph = ant.nodes.new('ShaderNodeTexGradient'); sph.gradient_type = 'SPHERICAL'
+    mp = ant.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (4.5, 4.5, 4.5)
+    near = ant.nodes.new('ShaderNodeMath'); near.operation = 'POWER'; near.inputs[1].default_value = 0.5
+    gk = ant.nodes.new('ShaderNodeValue')
+    mx = ant.nodes.new('ShaderNodeMath'); mx.operation = 'MAXIMUM'
+    mix = ant.nodes.new('ShaderNodeMix'); mix.data_type = 'RGBA'; mix.inputs['B'].default_value = (*srgb('#2fe07a'), 1)
+    cmap = ant.nodes.new('ShaderNodeMapping'); cmap.inputs['Scale'].default_value = (6.06, 5.714, 1.0); cmap.inputs['Location'].default_value = (0.0, 0.643, 0.5)
+    sep = ant.nodes.new('ShaderNodeSeparateXYZ')
+    fx = ant.nodes.new('ShaderNodeMath'); fx.operation = 'FLOOR'; fy = ant.nodes.new('ShaderNodeMath'); fy.operation = 'FLOOR'
+    mx1 = ant.nodes.new('ShaderNodeMath'); mx1.operation = 'MULTIPLY'; mx1.inputs[1].default_value = 0.37
+    my1 = ant.nodes.new('ShaderNodeMath'); my1.operation = 'MULTIPLY'; my1.inputs[1].default_value = 0.611
+    add = ant.nodes.new('ShaderNodeMath'); add.operation = 'ADD'; frc = ant.nodes.new('ShaderNodeMath'); frc.operation = 'FRACT'
+    ant.links.new(tc.outputs['Object'], cmap.inputs['Vector']); ant.links.new(cmap.outputs['Vector'], sep.inputs['Vector'])
+    ant.links.new(sep.outputs['X'], fx.inputs[0]); ant.links.new(sep.outputs['Y'], fy.inputs[0])
+    ant.links.new(fx.outputs[0], mx1.inputs[0]); ant.links.new(fy.outputs[0], my1.inputs[0])
+    ant.links.new(mx1.outputs[0], add.inputs[0]); ant.links.new(my1.outputs[0], add.inputs[1]); ant.links.new(add.outputs[0], frc.inputs[0])
+    ant.links.new(frc.outputs[0], hue.inputs['Fac'])
+    ant.links.new(tc.outputs['Object'], mp.inputs['Vector']); ant.links.new(mp.outputs['Vector'], sph.inputs['Vector'])
+    ant.links.new(sph.outputs['Fac'], near.inputs[0]); ant.links.new(near.outputs[0], mx.inputs[0]); ant.links.new(gk.outputs[0], mx.inputs[1])
+    ant.links.new(mx.outputs[0], mix.inputs['Factor']); ant.links.new(hue.outputs['Color'], mix.inputs['A'])
+    ant.links.new(mix.outputs['Result'], ab.inputs['Base Color']); ant.links.new(mix.outputs['Result'], ab.inputs['Emission Color'])
+    ek = ant.nodes.new('ShaderNodeValue'); ant.links.new(ek.outputs[0], ab.inputs['Emission Strength'])
+    mb.materials.append(am)
+
+    # glow on the glass around the final light
+    hm = bpy.data.materials['halo'].copy()
+    hstr = [nd for nd in hm.node_tree.nodes if nd.type == 'EMISSION'][0]
+    bpy.ops.mesh.primitive_circle_add(vertices=128, radius=1.0, fill_type='NGON', location=(0, -(T / 2) - 0.001, 0.01), rotation=(math.radians(90), 0, 0))
+    gl = bpy.context.object; gl.scale = (0.36, 0.36, 1); gl.data.materials.append(hm); gl.visible_shadow = False; gl.parent = rig
+
+    aim((0, -7.2, 0.35)); pose(-14, tilt_deg=-3)
+    hmul = [nd for nd in hm.node_tree.nodes if nd.type == 'MATH' and nd.operation == 'MULTIPLY'][0]
+    for fi, t in enumerate(ts):
+        for (x, y), e in zip(icons, els):
+            dist = math.hypot(x, y)
+            ti = smooth(0.05 + dist * 0.28, 0.62 + dist * 0.28, t)          # inner icons start first
+            ang = math.atan2(y, x) + ti * 1.1                                # spiral in
+            rr = dist * (1 - ti)
+            e.co = (rr * math.cos(ang), rr * math.sin(ang), 0.006 * ti)
+            k = 1 - 0.40 * ti
+            e.radius = 0.052 * k; e.size_x = e.size_y = 0.022 * k * (1 - 0.8 * ti); e.size_z = 0.004 + 0.01 * ti
+        mbo.scale = (1, 1, 0.32 + 0.68 * smooth(0.72, 1.0, t))
+        sk.outputs[0].default_value = smooth(0.15, 0.75, t)
+        gk.outputs[0].default_value = smooth(0.45, 0.85, t)
+        ek.outputs[0].default_value = 0.05 + 3.0 * smooth(0.6, 1.0, t)
+        hmul.inputs[1].default_value = 0.85 * smooth(0.7, 1.0, t); gl.hide_render = t < 0.7
+        render(os.path.join(OUT, f'm{fi:03d}.png'), res=(900, 1200), samples=samples)
