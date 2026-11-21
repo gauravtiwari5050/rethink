@@ -1,0 +1,12 @@
+{
+  "name": "rethink-phone-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "DRAFTS=1 SITE_URL=http://localhost:8080 node build.mjs && npx --yes serve@14.2.4 dist -l 8080"
+  },
+  "dependencies": {
+    "marked": "15.0.12"
+  }
+}
