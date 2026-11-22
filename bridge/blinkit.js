@@ -51,7 +51,8 @@ or {"status":"failed","reason":"..."} if you could not get there (also if Pay on
 const CONFIRM = (cart) => `${RULES}
 
 The caller has said yes on the call. Place the order now: on the checkout page, make sure Pay on delivery is selected,
-check the total is still ${cart.total} rupees, then press the button that places the order. If the total changed,
+check the total is still ${cart.total} rupees, then press the button that places the order ONCE. If nothing seems to
+happen, wait and take a snapshot; never press it a second time, which could place a second order. If the total changed,
 or Pay on delivery is not selected, do NOT place it; report that instead.
 
 Finish with one line of JSON and nothing after it:
@@ -60,14 +61,16 @@ Finish with one line of JSON and nothing after it:
 const TOOLS = [
   'browser_navigate', 'browser_navigate_back', 'browser_snapshot', 'browser_click', 'browser_type',
   'browser_press_key', 'browser_select_option', 'browser_wait_for', 'browser_tabs', 'browser_hover',
-  'browser_handle_dialog', 'browser_fill_form', 'browser_take_screenshot',
+  'browser_handle_dialog', 'browser_fill_form', 'browser_take_screenshot', 'browser_find',
 ].map((t) => `mcp__browser__${t}`);
 
 function runClaude(prompt, { resume, onProgress, onEvent }) {
   return new Promise((resolve) => {
     const args = ['-p', prompt, '--output-format', 'stream-json', '--verbose',
-      '--mcp-config', MCP_CONFIG, '--strict-mcp-config', '--allowedTools', TOOLS.join(','),
-      '--disallowedTools', 'Bash,Write,Edit,NotebookEdit,WebFetch,WebSearch,Task'];
+      // No built-in tools at all (no shell, files or web fetch); only the browser MCP server, and of its tools only
+      // TOOLS: anything else is refused without asking (dontAsk).
+      '--tools', '', '--mcp-config', MCP_CONFIG, '--strict-mcp-config',
+      '--allowedTools', TOOLS.join(','), '--permission-mode', 'dontAsk'];
     if (resume) args.push('--resume', resume);
     const child = spawn(CLAUDE, args, { cwd: WORKDIR, stdio: ['ignore', 'pipe', 'pipe'] });
     let buf = '';

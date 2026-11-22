@@ -10,8 +10,10 @@ R=/data/local/rethink/debian
 ENV="/usr/bin/env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin LANG=C.UTF-8"
 
 mounts() {
-  # /data is mounted nosuid; re-mount just the Debian tree with suid so sudo works inside it
-  mountpoint -q $R         || { mount --bind $R $R && mount -o remount,bind,suid $R; }
+  # /data is mounted nosuid; re-mount just the Debian tree with suid so sudo works inside it.
+  # Checked in /proc/mounts: toybox's mountpoint doesn't see a directory bound onto itself, and binding it again on
+  # every start stacked a new copy of the whole tree each time (the copies doubled).
+  grep -q " $R " /proc/mounts || { mount --bind $R $R && mount -o remount,bind,suid $R; }
   mountpoint -q $R/proc    || mount -t proc proc $R/proc
   mountpoint -q $R/sys     || mount -t sysfs sysfs $R/sys
   mountpoint -q $R/dev     || mount --bind /dev $R/dev
@@ -63,7 +65,7 @@ case "$1" in
     pkill -f '[n]ode server.js'
     pkill -f '[s]ocat TCP-LISTEN:9222'
     # unmount everything under the Debian tree, deepest first (Android's shared mounts can add extras)
-    n=0; while m=$(grep " $R" /proc/mounts | tail -1 | cut -d' ' -f2) && [ -n "$m" ] && [ $((n+=1)) -lt 50 ]; do
+    n=0; while m=$(grep " $R" /proc/mounts | tail -1 | cut -d' ' -f2) && [ -n "$m" ] && [ $((n+=1)) -lt 20000 ]; do
       umount -l "$m"; done
     echo stopped ;;
   *) echo "usage: sh boot.sh mount|start|stop" >&2; exit 2 ;;
