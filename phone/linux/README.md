@@ -10,8 +10,7 @@ The model runs in Anthropic's cloud, as it does on a laptop. The agent, its tool
 - **Debian 13 "trixie" (arm64)**, unpacked into `/data/local/rethink/debian` and entered with `chroot`. It's the root
   filesystem of Docker's official `debian:trixie-slim` image. `setup.sh` pins its commit and SHA-256.
 - **OpenSSH** on port 2222, for one user, `rethink`. It accepts key logins only: no passwords and no root login.
-- **Claude Code**, the official native Linux arm64 build, pinned in `setup.sh`. The phone's MCP server is
-  registered for the `rethink` user as `rethink-phone`.
+- **Claude Code**, the official native Linux arm64 build, pinned in `setup.sh`.
 - **`android`** (`/usr/local/bin/android`) enters Android's root filesystem through `/proc/1/root` with Android's
   environment, which `boot.sh` saves at start. So `input`, `am`, `uiautomator`, `screencap`, `content` and
   `dumpsys` all work. Each call is appended to `/var/log/android-commands.log` in Debian.
