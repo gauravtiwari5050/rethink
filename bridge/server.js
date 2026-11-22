@@ -1,12 +1,13 @@
-// Rethink dev bridge: phone call audio (raw 16 kHz mono s16le over TCP via `adb reverse`) <-> OpenAI GPT-Live.
+// Rethink call bridge, running on the phone (in its Debian, see phone/linux/): call audio <-> OpenAI GPT-Live.
 //
 //   node server.js            # listens on 127.0.0.1:7070
 //
-// The phone-side CallBridge (probe/) auto-answers incoming calls and connects here for each call.
-// Closing the socket from this side hangs the call up.
+// The phone-side CallBridge (probe/) auto-answers incoming calls and connects here over the phone's localhost
+// (raw 16 kHz mono s16le both ways). Closing the socket from this side hangs the call up.
 //
-// Brain: GPT-Live with Responses delegation — OpenAI runs the backend model (with hosted web search);
-// our own function tools (end_call, take_message) are executed here.
+// Brain: GPT-Live with Responses delegation. OpenAI runs the backend model (with hosted web search); our own
+// function tools (end_call, take_message, blinkit_order, blinkit_confirm) are executed here.
+// Phone commands go through `sudo android` (phone/linux/provision.sh).
 
 import 'dotenv/config';
 import net from 'node:net';
@@ -14,6 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
 import WebSocket from 'ws';
+import { BlinkitOrder, MAX_ORDER_RUPEES } from './blinkit.js';
 
 const env = (k, d) => (process.env[k] ?? '').trim() || d;
 const PORT = Number(env('BRIDGE_PORT', 7070));
@@ -23,7 +25,8 @@ const OWNER_CONTEXT = env('OWNER_CONTEXT', '');
 const VOICE = env('LIVE_VOICE', 'marin');
 const MODEL = env('LIVE_MODEL', 'gpt-live-1');
 const BACKEND_MODEL = env('BACKEND_MODEL', 'gpt-6-luna');
-const ADB = env('ADB', path.join(process.env.HOME, 'Library/Android/sdk/platform-tools/adb'));
+// Numbers allowed to order groceries (comma-separated, digits only compared). Empty: nobody can order.
+const ORDER_CALLERS = env('ORDER_ALLOWED_CALLERS', '').split(',').map((n) => n.replace(/\D/g, '').slice(-10)).filter(Boolean);
 const RATE = 16000;
 const BYTES_PER_MS = (RATE * 2) / 1000; // 32
 const FRAME = 20 * BYTES_PER_MS; // 640 bytes = 20 ms
@@ -41,9 +44,14 @@ const INSTRUCTIONS = `You are the AI phone assistant for ${OWNER}, answering a p
 - Be warm, brief and natural, like a good human receptionist. One or two sentences at a time.
 - Find out who is calling and why. Offer to take a message.
 - Callers may speak English, Hindi or Hinglish; reply in the language they use.
-- You can only do things through your backend: looking things up, saving a message for ${OWNER}, and ending the call.
+- You can only do things through your backend: looking things up, saving a message for ${OWNER}, ordering groceries
+  from Blinkit (only when the caller is ${OWNER}), and ending the call.
   Hand those off and wait for the result. Never claim you did something (saved a message, ended the call, looked something up) unless the backend confirmed it.
 - While the backend is working, tell the caller briefly ("One moment, let me check.") — don't go silent.
+- Grocery orders: while the order is being prepared you'll receive short progress notes about what the browser is
+  doing. Relay them briefly and naturally, so the caller can follow along. When the cart is ready, read back the
+  items, the total in rupees, the delivery time, the address and that it's pay on delivery, and ask clearly whether
+  to place the order. Only an explicit yes counts. Never say an order was placed unless the backend confirmed it.
 - To end the call (caller says bye / asks you to hang up / conversation is clearly over), hand off "end the call", then say a short goodbye.`;
 
 const BACKEND_INSTRUCTIONS = `You are the backend for a phone receptionist answering calls for ${OWNER}.
@@ -52,7 +60,10 @@ ${OWNER_CONTEXT ? `About ${OWNER}: ${OWNER_CONTEXT}\n` : ''}Today is ${new Date(
 - Use web_search for current facts (weather, news, opening hours, etc.).
 - When the caller leaves a message for ${OWNER}, call take_message with everything they said (name, callback number if given, the message, urgency).
 - When the caller wants to end the call or the conversation is over, call end_call.
-- Never share private details about ${OWNER} (location, schedule, contacts).`;
+- Never share private details about ${OWNER} (location, schedule, contacts).
+- Groceries: when the caller asks to order something, call blinkit_order with exactly what they asked for. It starts
+  the work and returns at once; progress and the cart summary arrive separately. When the caller explicitly says yes
+  to the cart that was read back to them, call blinkit_confirm. If they say no or want changes, don't call it.`;
 
 const TOOLS = [
   { type: 'web_search' },
@@ -70,6 +81,22 @@ const TOOLS = [
       },
       required: ['message'],
     },
+  },
+  {
+    type: 'function',
+    name: 'blinkit_order',
+    description: `Start ordering groceries on Blinkit for ${OWNER} (pay on delivery, max ${MAX_ORDER_RUPEES} rupees). Only works when the caller is ${OWNER}. Fills the cart and stops at checkout; nothing is bought until blinkit_confirm.`,
+    parameters: {
+      type: 'object',
+      properties: { request: { type: 'string', description: 'What to order, in the caller’s words, e.g. "one litre of milk"' } },
+      required: ['request'],
+    },
+  },
+  {
+    type: 'function',
+    name: 'blinkit_confirm',
+    description: 'Place the prepared Blinkit order. Call only after the caller explicitly said yes to the cart summary.',
+    parameters: { type: 'object', properties: {} },
   },
   {
     type: 'function',
@@ -100,7 +127,34 @@ net
 function handleCall(sock) {
   sock.setNoDelay(true);
   const callId = new Date().toISOString().replace(/[:.]/g, '-');
-  const log = { callId, startedAt: new Date().toISOString(), transcript: [], messages: [], tools: [] };
+  const log = { callId, startedAt: new Date().toISOString(), transcript: [], messages: [], tools: [], order: [] };
+  // Who is calling: only the allowed numbers can order. Read from Android at the start of the call.
+  const caller = { number: null };
+  callerNumber().then((n) => {
+    caller.number = n;
+    log.callerAllowedToOrder = !!n && ORDER_CALLERS.includes(n);
+    console.log(`[${ts()}] caller ${n ? '…' + n.slice(-4) : 'unknown'}; may order: ${log.callerAllowedToOrder}`);
+  });
+  // Progress from the ordering agent, relayed to the voice model to say. At most one note every few seconds.
+  let lastSaid = 0;
+  let pendingNote = null;
+  const say = (content, force) => {
+    const now = Date.now();
+    if (!force && now - lastSaid < 3500) { pendingNote = content; return; }
+    lastSaid = now;
+    pendingNote = null;
+    send({ type: 'session.commentary.append', event_id: eid('note'), delegation_id: null, content });
+  };
+  const noteTimer = setInterval(() => pendingNote && say(pendingNote), 1000);
+  const order = new BlinkitOrder({
+    onProgress: (text, tool) => {
+      log.order.push({ atMs: Date.now() - t0, ...(text ? { text } : { tool }) });
+      if (text) {
+        console.log(`[${ts()}] 🛒 ${text}`);
+        say(`Progress on the Blinkit order (tell the caller briefly, in your own words): ${text}`);
+      } else console.log(`[${ts()}]    · ${tool.tool} ${JSON.stringify(tool.input).slice(0, 120)}`);
+    },
+  });
   const callerPcm = [];
   const agentPcm = [];
   const t0 = Date.now();
@@ -193,6 +247,39 @@ function handleCall(sock) {
     });
   });
 
+  // Ordering runs for a minute or two, so these tools return at once and the outcome is spoken via commentary.
+  function startOrderTool(name, args) {
+    if (!log.callerAllowedToOrder) {
+      return { status: 'refused', note: `Ordering is only available when ${OWNER} calls from their own number. Tell the caller you can't order for them.` };
+    }
+    if (order.busy) return { status: 'busy', note: 'Still working on the order; progress updates will follow.' };
+    if (name === 'blinkit_order') {
+      order.prepare(args.request).then((r) => {
+        log.order.push({ atMs: Date.now() - t0, prepared: r });
+        console.log(`[${ts()}] 🛒 prepared: ${JSON.stringify(r)}`);
+        if (r.status === 'ready') {
+          const items = r.items.map((i) => `${i.quantity} × ${i.name} (${i.price} rupees)`).join(', ');
+          say(`The Blinkit cart is ready but NOT ordered yet: ${items}. Item total ${r.item_total} rupees, fees ${r.fees} rupees, total ${r.total} rupees. Delivery to ${r.address} in about ${r.eta}. Payment: ${r.payment}. Read this back briefly and ask the caller whether to place the order.`, true);
+        } else {
+          say(`The Blinkit order could not be prepared: ${r.reason}. Tell the caller briefly.`, true);
+        }
+      });
+      return { status: 'started', note: 'Working on it in the phone’s browser. Tell the caller you’re on it; progress updates and the cart summary will follow. Nothing is ordered yet.' };
+    }
+    if (!order.cart) return { status: 'error', note: 'There is no prepared cart to confirm yet.' };
+    order.confirm().then((r) => {
+      log.order.push({ atMs: Date.now() - t0, confirmed: r });
+      console.log(`[${ts()}] 🛒 confirm: ${JSON.stringify(r)}`);
+      if (r.status === 'placed') {
+        say(`The Blinkit order is placed. ${r.order_id ? 'Order ' + r.order_id + '. ' : ''}Total ${r.total} rupees, pay on delivery, arriving in about ${r.eta}.${r.warning ? ' Note: ' + r.warning + '.' : ''} Tell the caller.`, true);
+        notifyPhone('🛒 Blinkit order placed', `${r.order_id || ''} · ${r.total} rupees, pay on delivery · ${r.eta}`, `order-${callId}`);
+      } else {
+        say(`The Blinkit order was NOT placed: ${r.reason}. Tell the caller.`, true);
+      }
+    });
+    return { status: 'placing', note: 'Placing the order now. Tell the caller; the confirmation will follow. It is not placed yet.' };
+  }
+
   function runTool(delegationId, item) {
     let args = {};
     try {
@@ -204,6 +291,8 @@ function handleCall(sock) {
     if (item.name === 'take_message') {
       log.messages.push(args);
       output = { status: 'saved', note: `${OWNER} will get this as a notification right after the call.` };
+    } else if (item.name === 'blinkit_order' || item.name === 'blinkit_confirm') {
+      output = startOrderTool(item.name, args);
     } else if (item.name === 'end_call') {
       hangup = { requestedAt: Date.now() };
       output = { status: 'ok', note: 'The line will close right after your goodbye. Say a brief goodbye now.' };
@@ -301,6 +390,7 @@ function handleCall(sock) {
     log.endedBy = endedBy;
     clearInterval(pacer);
     clearInterval(lineTimer);
+    clearInterval(noteTimer);
     flushLine('caller');
     flushLine('agent');
     if (ws.readyState === WebSocket.OPEN) {
@@ -345,10 +435,23 @@ async function summarizeAndNotify(log) {
   notifyPhone(`${s.urgent ? '🔴 ' : ''}📞 ${s.title}`, s.summary, log.callId);
 }
 
+const q = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
+const android = (cmd, cb) => execFile('sudo', ['android', cmd], { timeout: 10000 }, cb);
+
 function notifyPhone(title, body, tag) {
-  const q = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
   const cmd = `cmd notification post -S bigtext -t ${q(title)} ${q('rethink-' + tag)} ${q(body)}`;
-  execFile(ADB, ['shell', cmd], (err) => err && console.log(`[${ts()}] notify failed: ${err.message}`));
+  android(cmd, (err) => err && console.log(`[${ts()}] notify failed: ${err.message}`));
+}
+
+// The current call's number, last 10 digits, from Android's telephony state (null if it can't be read).
+function callerNumber() {
+  return new Promise((resolve) =>
+    // Only the live call state: dumpsys telecom also lists past calls, which could wrongly match an allowed number.
+    android('dumpsys telephony.registry', (err, out = '') => {
+      const m = out.match(/mCallIncomingNumber=\+?(\d{10,})/);
+      resolve(m ? m[1].slice(-10) : null);
+    }),
+  );
 }
 
 function writeWav(file, pcm) {

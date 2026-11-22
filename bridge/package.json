@@ -1,14 +1,14 @@
 {
   "name": "rethink-bridge",
   "version": "1.0.0",
-  "description": "",
+  "description": "Rethink Phone call bridge: call audio <-> GPT-Live, runs on the phone",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "Rahul T",
-  "license": "ISC",
+  "author": "The Rethink Phone contributors",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "dotenv": "^18.0.10",

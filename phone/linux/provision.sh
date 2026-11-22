@@ -13,7 +13,7 @@ grep -q '^aid_net_raw:' /etc/group || groupadd -g 3004 aid_net_raw
 echo 'APT::Sandbox::User "root";' > /etc/apt/apt.conf.d/01-android-network
 
 apt-get update
-apt-get install -y --no-install-recommends openssh-server tmux git curl ca-certificates less procps tzdata
+apt-get install -y --no-install-recommends openssh-server tmux git curl ca-certificates less procps tzdata nodejs npm socat
 printf '127.0.0.1 localhost\n::1 localhost\n' > /etc/hosts
 
 id rethink >/dev/null 2>&1 || useradd -m -s /bin/bash rethink
@@ -91,5 +91,13 @@ chown rethink:rethink /home/rethink/CLAUDE.md
 # Claude works through the shell above. To use the MCP server instead (mcp/), run as rethink:
 #   claude mcp add --scope user --transport http rethink-phone http://127.0.0.1:7071/mcp
 su - rethink -c 'claude mcp remove --scope user rethink-phone >/dev/null 2>&1' || true
+
+# The browser tools for Claude: Playwright MCP (pinned), talking to the phone's Chromium over its DevTools socket,
+# which boot.sh exposes on 127.0.0.1:9222. Chromium itself is installed by browser.sh.
+install -d -o rethink -g rethink /opt/rethink /opt/rethink/browser /opt/rethink/blinkit /opt/rethink/bridge
+su rethink -c 'cd /opt/rethink/browser && [ -f package.json ] || echo "{\"private\":true}" > package.json; PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install --no-audit --no-fund --save-exact @playwright/mcp@0.0.84 >/dev/null'
+cat > /opt/rethink/browser/mcp.json <<'EOF'
+{"mcpServers":{"browser":{"command":"node","args":["/opt/rethink/browser/node_modules/@playwright/mcp/cli.js","--cdp-endpoint","http://127.0.0.1:9222"]}}}
+EOF
 
 echo "provisioned: $(. /etc/os-release; echo $PRETTY_NAME), $(su - rethink -c 'claude --version')"
