@@ -25,7 +25,7 @@ The Rethink phone's screen, mirrored to a laptop with [scrcpy](https://github.co
 6. **2:35–3:33** Claude checks the total is still ₹154 and cash is selected, presses Pay Now, and waits for the order page. The assistant reads out the order number.
 7. **3:45** Gaurav asks it to text him when the order is delivered. It says it can't, which is true, and hangs up when asked.
 
-The sound is the call itself, recorded on the phone. Gaurav is on the left channel of the original and the assistant on the right; the video mixes both.
+From 0:45 the sound is the call itself, recorded on the phone. Gaurav is on the left channel of the original and the assistant on the right; the video mixes both.
 
 | | |
 |---|---|
@@ -35,7 +35,7 @@ The sound is the call itself, recorded on the phone. Gaurav is on the left chann
 | Payment | Cash on delivery. No card, UPI or wallet is used, and the code refuses any other payment |
 | Takes | One earlier call at 18:25 was refused: the phone couldn't read the caller's number, so it wouldn't order (see below). This take, at 18:31, is the first that ordered. A later call that evening ordered peas, and isn't shown |
 | Rehearsal | Before the calls, two dry runs without a call, which stop before ordering, to check the flow on the real site. The cart was emptied before this take |
-| Edits | Cropped to the phone, with the webcam moved beside it. The delivery address, the list of saved addresses, the last digits of saved cards, and the map and delivery partner after ordering are covered. The address is muted with a tone where it's spoken, five times. The laptop's microphone track is replaced with the phone's call recording, aligned to the video. Re-encoded at 30 fps. No cuts, no speed changes |
+| Edits | Cropped to the phone, with the webcam moved beside it. The delivery address, the list of saved addresses, the last digits of saved cards, and the map and delivery partner after ordering are covered. The address is muted with a tone where it's spoken, five times. Before the call, the sound is the laptop's microphone, with Gaurav explaining the demo. From the moment the call connects, it's the phone's own call recording, aligned to the video, in place of the microphone. Re-encoded at 30 fps. No cuts, no speed changes |
 | Log | [call-log.json](/assets/experiments/03/call-log.json): the transcript with timings, every browser step Claude took, and the tool calls. Address redacted |
 
 ## How it works
