@@ -1,7 +1,8 @@
-# Claude Code on the phone
+# Claude Code on the phone, with root
 
 Runs a small Debian system on the phone, with an SSH server and Claude Code. You SSH into the phone, start
-`claude`, and it operates the phone through the phone's own [MCP server](../../mcp/) on `127.0.0.1:7071`.
+`claude`, and it operates the phone with root, through `sudo android <command>`, which runs any command in
+Android's own root shell.
 The model runs in Anthropic's cloud, as it does on a laptop. The agent, its tools and its log are on the phone.
 
 ## How it works
@@ -11,6 +12,14 @@ The model runs in Anthropic's cloud, as it does on a laptop. The agent, its tool
 - **OpenSSH** on port 2222, for one user, `rethink`. It accepts key logins only: no passwords and no root login.
 - **Claude Code**, the official native Linux arm64 build, pinned in `setup.sh`. The phone's MCP server is
   registered for the `rethink` user as `rethink-phone`.
+- **`android`** (`/usr/local/bin/android`) enters Android's root filesystem through `/proc/1/root` with Android's
+  environment, which `boot.sh` saves at start. So `input`, `am`, `uiautomator`, `screencap`, `content` and
+  `dumpsys` all work. Each call is appended to `/var/log/android-commands.log` in Debian.
+- **`~/CLAUDE.md`** tells Claude it's on the phone, lists the useful commands, and asks it to say what it's about
+  to do before calling or messaging anyone. The MCP server isn't registered for this setup. To use it instead, see
+  the end of `provision.sh`.
+- `/data` is mounted `nosuid` on Android, so `boot.sh` re-mounts only the Debian tree with `suid`, which lets
+  `sudo` work.
 - Android only lets members of group 3003 open network sockets, so `rethink` is in that group, and apt downloads as root.
 - DNS goes to 1.1.1.1 and 8.8.8.8, since Android has no `resolv.conf` to share.
 
@@ -54,16 +63,18 @@ and then `rm -rf /data/local/rethink`.
 
 ## Security, stated plainly
 
-- `chroot` is not a sandbox. Root inside Debian is root on the phone, and the MCP server can place calls and send
-  texts. Anyone with the SSH key can do what Claude can.
+- **Claude has root on the phone.** It can do anything, including reading every app's data or wiping the phone.
+  `chroot` is not a sandbox. Anyone with the SSH key, or with Termux on the phone, can do the same.
+- What keeps this in check is Claude Code's permission prompt, which shows each exact command before it runs, plus
+  the instructions in `CLAUDE.md` and the log. Auto mode removes the prompt. Don't use it with root unless you
+  mean it.
 - That's why SSH takes one key and one user, and the phone should only be on networks you trust. Remote access from
   outside the LAN is not set up.
-- Claude Code asks before each tool call that changes something: calling, hanging up, tapping, typing. Three
-  read-only tools (`device_status`, `get_screen`, `find_contact`) are allowed in `~/.claude/settings.json`. Every tool call is logged on the phone at
-  `/data/local/tmp/rethink/mcp-audit.jsonl`.
+- Each `android` call is logged at `/var/log/android-commands.log`, and Claude Code keeps its full transcript in
+  `~/.claude/projects/`. The MCP server, which has a narrower tool set, is in [`mcp/`](../../mcp/), with its own log.
 - Your Claude sign-in is stored in `/home/rethink/.claude/` on the phone. It is never in this repo.
 
 ## Limits
 
 - After a reboot it needs `start.sh` over USB again. Starting at boot is future work.
-- It needs root, like the MCP server.
+- It needs a rooted phone (adb root).

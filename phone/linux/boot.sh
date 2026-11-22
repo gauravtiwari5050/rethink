@@ -7,6 +7,8 @@ R=/data/local/rethink/debian
 ENV="/usr/bin/env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin LANG=C.UTF-8"
 
 mounts() {
+  # /data is mounted nosuid; re-mount just the Debian tree with suid so sudo works inside it
+  mountpoint -q $R         || { mount --bind $R $R && mount -o remount,bind,suid $R; }
   mountpoint -q $R/proc    || mount -t proc proc $R/proc
   mountpoint -q $R/sys     || mount -t sysfs sysfs $R/sys
   mountpoint -q $R/dev     || mount --bind /dev $R/dev
@@ -18,6 +20,11 @@ case "$1" in
   mount) mounts ;;
   start)
     mounts
+    # Android's own environment (PATH, BOOTCLASSPATH, ...), for the `android` command inside Debian.
+    # Debian follows the phone's time zone
+    tz=$(getprop persist.sys.timezone); [ -n "$tz" ] && [ -f $R/usr/share/zoneinfo/$tz ] && ln -sf /usr/share/zoneinfo/$tz $R/etc/localtime
+    export -p | grep -vE '^export (HOSTNAME|TERM|PWD|OLDPWD|SHLVL|_|HOME|USER|LOGNAME|SHELL|TMPDIR|SSH_[A-Z_]*|ADB_[A-Z_]*)=' \
+      > /data/local/rethink/android.env
     if ! pgrep -f '[s]shd: /usr/sbin/sshd' >/dev/null; then
       mkdir -p $R/run/sshd
       chroot $R $ENV /usr/sbin/sshd
@@ -33,7 +40,9 @@ case "$1" in
   stop)
     pkill -f '[s]shd: /usr/sbin/sshd'
     pkill -f '[a]pp.rethink.mcp.Server'
-    for m in tmp dev/pts dev sys proc; do mountpoint -q $R/$m && umount $R/$m; done
+    # unmount everything under the Debian tree, deepest first (Android's shared mounts can add extras)
+    n=0; while m=$(grep " $R" /proc/mounts | tail -1 | cut -d' ' -f2) && [ -n "$m" ] && [ $((n+=1)) -lt 50 ]; do
+      umount -l "$m"; done
     echo stopped ;;
   *) echo "usage: sh boot.sh mount|start|stop" >&2; exit 2 ;;
 esac
