@@ -39,4 +39,23 @@ grep -q '.local/bin' /home/rethink/.profile || echo 'export PATH="$HOME/.local/b
 # The phone's own MCP server, on the phone's localhost.
 su - rethink -c 'claude mcp remove --scope user rethink-phone >/dev/null 2>&1; claude mcp add --scope user --transport http rethink-phone http://127.0.0.1:7071/mcp'
 
+# Read-only phone tools run without asking; calling, hanging up, tapping and typing still ask.
+# (On the phone's own screen, a prompt would otherwise hide behind the dialer while Claude checks it.)
+S=/home/rethink/.claude/settings.json
+if [ ! -f $S ]; then
+  install -d -o rethink -g rethink /home/rethink/.claude
+  cat > $S <<'EOF'
+{
+  "permissions": {
+    "allow": [
+      "mcp__rethink-phone__device_status",
+      "mcp__rethink-phone__get_screen",
+      "mcp__rethink-phone__find_contact"
+    ]
+  }
+}
+EOF
+  chown rethink:rethink $S
+fi
+
 echo "provisioned: $(. /etc/os-release; echo $PRETTY_NAME), $(su - rethink -c 'claude --version')"

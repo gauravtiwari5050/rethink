@@ -44,7 +44,7 @@ has run you can unplug USB. Both servers keep running until the phone reboots.
 
 This installs [Termux](https://github.com/termux/termux-app) (v0.118.3, the official GitHub build, checksummed),
 gives it OpenSSH from Termux's package repository, and creates a key that never leaves the phone. It also adds a
-`debian` command. On the phone, open Termux, type `debian`, then `claude`. Termux runs as an ordinary app
+`debian` command. Termux's OpenSSH comes from its rolling package repository, so that one piece isn't pinned. On the phone, open Termux, type `debian`, then `claude`. Termux runs as an ordinary app
 without root, so it gets into Debian over SSH on `127.0.0.1:2222`, the same way your computer does.
 
 ### Stopping and removing
@@ -58,7 +58,8 @@ and then `rm -rf /data/local/rethink`.
   texts. Anyone with the SSH key can do what Claude can.
 - That's why SSH takes one key and one user, and the phone should only be on networks you trust. Remote access from
   outside the LAN is not set up.
-- Claude Code asks before each tool call unless you switch on auto mode. Every tool call is logged on the phone at
+- Claude Code asks before each tool call that changes something: calling, hanging up, tapping, typing. Three
+  read-only tools (`device_status`, `get_screen`, `find_contact`) are allowed in `~/.claude/settings.json`. Every tool call is logged on the phone at
   `/data/local/tmp/rethink/mcp-audit.jsonl`.
 - Your Claude sign-in is stored in `/home/rethink/.claude/` on the phone. It is never in this repo.
 
