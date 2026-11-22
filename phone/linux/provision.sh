@@ -48,13 +48,18 @@ grep -q '.local/bin' /home/rethink/.profile || echo 'export PATH="$HOME/.local/b
 apt-get install -y --no-install-recommends sudo
 echo 'rethink ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/rethink && chmod 440 /etc/sudoers.d/rethink
 cat > /usr/local/bin/android <<'EOF'
-#!/bin/sh
+#!/bin/bash
 # Rethink Phone: run a command in Android's root shell, e.g.  sudo android input tap 540 1200
 # Logged to /var/log/android-commands.log. Needs root (sudo).
 [ "$(id -u)" = 0 ] || { echo "android: needs root, use: sudo android $*" >&2; exit 1; }
 [ $# -gt 0 ] || { echo "usage: sudo android <command...>" >&2; exit 2; }
 printf '%s\t%s\t%s\n' "$(date -Iseconds)" "${SUDO_USER:-root}" "$*" >> /var/log/android-commands.log
-exec chroot /proc/1/root /system/bin/sh -c '. /data/local/rethink/android.env; cd /; eval "$1"' android "$*"
+# Output always goes through pipes: `am` and `cmd` hand their stdout/stderr to Android's system_server, and
+# SELinux won't let it write to files in Debian (e.g. where Claude Code collects command output).
+[ -p /dev/stdin ] && IN=/dev/stdin || IN=/dev/null
+set -o pipefail
+chroot /proc/1/root /system/bin/sh -c '. /data/local/rethink/android.env; cd /; eval "$1"' android "$*" \
+  < $IN 2> >(cat >&2) | cat
 EOF
 chmod 755 /usr/local/bin/android
 
