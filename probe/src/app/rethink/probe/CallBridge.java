@@ -16,14 +16,19 @@ import java.net.Socket;
  * Dev-loop call bridge (runs via app_process as root).
  *
  * Waits for an incoming call, auto-answers after a delay, then streams the caller's audio
- * (16 kHz mono s16le) to 127.0.0.1:<port> — which `adb reverse` forwards to the Mac — and plays
+ * (16 kHz mono s16le) to the call bridge on 127.0.0.1:<port> (bridge/, in the phone's Debian) and plays
  * whatever bytes come back into the call uplink. Raw PCM both ways, no framing.
+ *
+ * While the phone rings it also saves the caller's number to INCOMING ("<epoch ms> <number>", root-only),
+ * because Android clears it once the call is answered. The bridge reads it to decide who may order groceries.
+ * The file is deleted when the call ends.
  *
  *   CallBridge [port=7070] [answerDelayMs=4000]
  */
 public class CallBridge {
     static final int RATE = 16000;
     static final int CHUNK = RATE / 50 * 2; // 20 ms
+    static final java.io.File INCOMING = new java.io.File("/data/local/tmp/rethink/incoming-call");
 
     public static void main(String[] args) throws Exception {
         int port = args.length > 0 ? Integer.parseInt(args[0]) : 7070;
@@ -37,6 +42,7 @@ public class CallBridge {
             // 1 = MODE_RINGTONE (incoming call ringing)
             while (am.getMode() != AudioManager.MODE_RINGTONE) Thread.sleep(200);
             log("incoming call ringing; answering in " + answerDelay + " ms");
+            saveIncomingNumber();
             long until = System.currentTimeMillis() + answerDelay;
             boolean stillRinging = true;
             while (System.currentTimeMillis() < until) {
@@ -59,7 +65,25 @@ public class CallBridge {
                 log("bridge error: " + Probe.root(t));
             }
             while (am.getMode() == AudioManager.MODE_IN_CALL) Thread.sleep(200);
+            INCOMING.delete();
             log("call ended");
+        }
+    }
+
+    static void saveIncomingNumber() {
+        String number = "";
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"dumpsys", "telephony.registry"});
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("mCallIncomingNumber=(\\+?\\d+)")
+                    .matcher(new String(p.getInputStream().readAllBytes()));
+            if (m.find()) number = m.group(1);
+            p.waitFor();
+            java.nio.file.Files.writeString(INCOMING.toPath(), System.currentTimeMillis() + " " + number + "\n");
+            INCOMING.setReadable(false, false);
+            INCOMING.setReadable(true, true);
+            log("caller number " + (number.isEmpty() ? "unknown" : "saved (…" + number.substring(Math.max(0, number.length() - 4)) + ")"));
+        } catch (Throwable t) {
+            log("could not read the caller number: " + Probe.root(t));
         }
     }
 
@@ -89,7 +113,7 @@ public class CallBridge {
         Socket sock = new Socket();
         sock.setTcpNoDelay(true);
         sock.connect(new InetSocketAddress("127.0.0.1", port), 3000);
-        log("connected to Mac bridge");
+        log("connected to the call bridge");
         OutputStream out = sock.getOutputStream();
         InputStream in = sock.getInputStream();
 

@@ -451,13 +451,14 @@ function notifyPhone(title, body, tag) {
   android(cmd, (err) => err && console.log(`[${ts()}] notify failed: ${err.message}`));
 }
 
-// The current call's number, last 10 digits, from Android's telephony state (null if it can't be read).
+// The current call's number, last 10 digits, or null. Android clears it once a call is answered, so CallBridge
+// (probe/) saves it while the phone rings, as "<epoch ms> <number>"; anything older than two minutes is ignored.
 function callerNumber() {
   return new Promise((resolve) =>
-    // Only the live call state: dumpsys telecom also lists past calls, which could wrongly match an allowed number.
-    android('dumpsys telephony.registry', (err, out = '') => {
-      const m = out.match(/mCallIncomingNumber=\+?(\d{10,})/);
-      resolve(m ? m[1].slice(-10) : null);
+    android('cat /data/local/tmp/rethink/incoming-call', (err, out = '') => {
+      const [at, number = ''] = out.trim().split(' ');
+      const fresh = Date.now() - Number(at) < 2 * 60 * 1000;
+      resolve(fresh && number.replace(/\D/g, '').length >= 10 ? number.replace(/\D/g, '').slice(-10) : null);
     }),
   );
 }
