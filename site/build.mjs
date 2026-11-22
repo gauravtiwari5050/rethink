@@ -163,6 +163,6 @@ ${siteHeader}
 </html>
 `);
 // long cache for renders and fonts-free assets; HTML always fresh (Cloudflare Pages / Netlify format)
-write('_headers', `/assets/*\n  Cache-Control: public, max-age=86400\n/*.html\n  Cache-Control: public, max-age=0, must-revalidate\n/*.jsonl\n  Content-Type: text/plain; charset=utf-8\n`);
+write('_headers', `/assets/*\n  Cache-Control: public, max-age=86400\n/*.html\n  Cache-Control: public, max-age=0, must-revalidate\n/*.jsonl\n  Content-Type: text/plain; charset=utf-8\n/*.log\n  Content-Type: text/plain; charset=utf-8\n`);
 
 console.log(`built ${exps.length} experiment(s) → ${path.relative(process.cwd(), OUT) || OUT} for ${SITE}`);

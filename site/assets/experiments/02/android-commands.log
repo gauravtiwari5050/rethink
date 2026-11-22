@@ -1,0 +1,2 @@
+2026-11-22T16:18:10+05:30	rethink	content query --uri content://com.android.contacts/data/phones --projection display_name:data1
+2026-11-22T16:18:16+05:30	rethink	am start -a android.intent.action.CALL -d tel:+91XXXXXXXXXX
