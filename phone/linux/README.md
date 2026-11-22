@@ -36,6 +36,19 @@ claude                     # first time: sign in, then ask it to do something on
 `setup.sh` creates a dedicated key, `~/.ssh/rethink_phone`, unless you pass your own `.pub` file. Once `start.sh`
 has run you can unplug USB. Both servers keep running until the phone reboots.
 
+### A terminal on the phone itself
+
+```sh
+./phone/linux/termux.sh    # once, after setup.sh
+```
+
+This installs [Termux](https://github.com/termux/termux-app) (v0.118.3, the official GitHub build, checksummed),
+gives it OpenSSH from Termux's package repository, and creates a key that never leaves the phone. It also adds a
+`debian` command. On the phone, open Termux, type `debian`, then `claude`. Termux runs as an ordinary app
+without root, so it gets into Debian over SSH on `127.0.0.1:2222`, the same way your computer does.
+
+### Stopping and removing
+
 On the phone, `sh /data/local/rethink/boot.sh stop` stops both servers and unmounts. To remove everything, run that
 and then `rm -rf /data/local/rethink`.
 
