@@ -21,7 +21,11 @@ usermod -aG aid_inet,aid_net_raw rethink
 usermod -p '*' rethink   # no password, but not locked: key login only
 
 install -d -m 700 -o rethink -g rethink /home/rethink/.ssh
-install -m 600 -o rethink -g rethink /root/authorized_keys /home/rethink/.ssh/authorized_keys
+# add the computer's key, keeping any already there (e.g. Termux's, from termux.sh)
+AK=/home/rethink/.ssh/authorized_keys
+touch $AK
+while read -r k; do [ -n "$k" ] && ! grep -qxF "$k" $AK && echo "$k" >> $AK; done < /root/authorized_keys
+chown rethink:rethink $AK && chmod 600 $AK
 
 cat > /etc/ssh/sshd_config.d/rethink.conf <<'EOF'
 # Rethink Phone: key-only logins for one user.
