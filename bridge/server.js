@@ -157,6 +157,8 @@ function handleCall(sock) {
   });
   const callerPcm = [];
   const agentPcm = [];
+  const played = []; // [ms since t0, frame]: the assistant's audio as actually sent into the call, for the recording
+  let callerStartMs = null;
   const t0 = Date.now();
   console.log(`\n[${ts()}] ☎️  call connected (${callId})`);
 
@@ -170,7 +172,11 @@ function handleCall(sock) {
     const now = Date.now();
     if (playhead < now) playhead = now;
     while (queued >= FRAME && playhead - now < LEAD_MS) {
-      if (!sock.destroyed) sock.write(take(FRAME));
+      if (!sock.destroyed) {
+        const f = take(FRAME);
+        sock.write(f);
+        played.push([playhead - t0, f]);
+      }
       playhead += 20;
     }
     if (hangup) {
@@ -375,6 +381,7 @@ function handleCall(sock) {
 
   // ---- inbound (phone -> agent)
   sock.on('data', (chunk) => {
+    if (callerStartMs === null) callerStartMs = Date.now() - t0;
     callerPcm.push(chunk);
     if (!started) return; // drop audio until session is ready
     pending = pending.length ? Buffer.concat([pending, chunk]) : chunk;
@@ -401,6 +408,7 @@ function handleCall(sock) {
     fs.writeFileSync(`${base}.json`, JSON.stringify(log, null, 2));
     writeWav(`${base}-caller.wav`, Buffer.concat(callerPcm));
     writeWav(`${base}-agent.wav`, Buffer.concat(agentPcm));
+    writeCallRecording(`${base}-call.wav`, Buffer.concat(callerPcm), callerStartMs ?? 0, played);
     console.log(`[${ts()}] 📴 call ended by ${endedBy} after ${Math.round((Date.now() - t0) / 1000)} s — saved calls/${callId}.json`);
     summarizeAndNotify(log).catch((e) => console.log(`[${ts()}] summary failed: ${e.message}`));
   }
@@ -454,17 +462,35 @@ function callerNumber() {
   );
 }
 
-function writeWav(file, pcm) {
+// The whole call as heard on the line, time-aligned: caller on the left channel, assistant on the right.
+function writeCallRecording(file, caller, callerStartMs, played) {
+  const at = (ms) => Math.round(ms) * BYTES_PER_MS;
+  let end = at(callerStartMs) + caller.length;
+  for (const [ms, f] of played) end = Math.max(end, at(ms) + f.length);
+  end -= end % 2;
+  const left = Buffer.alloc(end);
+  const right = Buffer.alloc(end);
+  caller.copy(left, at(callerStartMs));
+  for (const [ms, f] of played) f.copy(right, at(ms));
+  const stereo = Buffer.alloc(end * 2);
+  for (let i = 0; i < end; i += 2) {
+    stereo.writeInt16LE(left.readInt16LE(i), i * 2);
+    stereo.writeInt16LE(right.readInt16LE(i), i * 2 + 2);
+  }
+  writeWav(file, stereo, 2);
+}
+
+function writeWav(file, pcm, channels = 1) {
   const h = Buffer.alloc(44);
   h.write('RIFF', 0);
   h.writeUInt32LE(36 + pcm.length, 4);
   h.write('WAVEfmt ', 8);
   h.writeUInt32LE(16, 16);
   h.writeUInt16LE(1, 20);
-  h.writeUInt16LE(1, 22);
+  h.writeUInt16LE(channels, 22);
   h.writeUInt32LE(RATE, 24);
-  h.writeUInt32LE(RATE * 2, 28);
-  h.writeUInt16LE(2, 32);
+  h.writeUInt32LE(RATE * 2 * channels, 28);
+  h.writeUInt16LE(2 * channels, 32);
   h.writeUInt16LE(16, 34);
   h.write('data', 36);
   h.writeUInt32LE(pcm.length, 40);

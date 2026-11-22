@@ -29,7 +29,7 @@ $A shell "sh /data/local/rethink/boot.sh mount; chroot $R /usr/bin/env -i PATH=/
    su rethink -c \"cd /opt/rethink/bridge && npm ci --omit=dev --no-audit --no-fund >/dev/null\"'"
 
 # restart what changed
-$A shell "pkill -f [a]pp.rethink.mcp.Server; pkill -f [a]pp.rethink.probe.CallBridge; pkill -f '[n]ode server.js'" || true
+$A shell "pkill -f [a]pp.rethink.mcp.Server; pkill -f [a]pp.rethink.probe.CallBridge; pkill -f '[n]ode server.js'; sleep 1" || true
 $A shell 'sh /data/local/rethink/boot.sh start'
 echo
 echo "SSH: ssh -i ~/.ssh/rethink_phone -p 2222 rethink@<the phone's Wi-Fi address above>"

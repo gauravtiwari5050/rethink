@@ -19,14 +19,20 @@ const MCP_CONFIG = process.env.BROWSER_MCP_CONFIG || '/opt/rethink/browser/mcp.j
 const WORKDIR = process.env.BLINKIT_WORKDIR || '/opt/rethink/blinkit';
 export const MAX_ORDER_RUPEES = Number(process.env.MAX_ORDER_RUPEES || 500);
 const TIMEOUT_MS = 4 * 60 * 1000;
+// Which saved address to deliver to, when the account has several (set on the phone, in bridge/.env; never committed)
+const ADDRESS = (process.env.DELIVERY_ADDRESS || '').trim();
 
 const RULES = `You are ordering groceries on blinkit.com for the phone's owner, in the Chromium browser on this phone.
 A person is on a phone call listening to your progress, so:
 - Before each step, write ONE short plain sentence saying what you are doing, e.g. "Searching Blinkit for milk."
   or "Adding Amul Taaza 1 litre to the cart, 68 rupees." No markdown. These sentences are read out on the call.
-- Use only the browser tools. Stay on blinkit.com. The owner is already logged in, with a saved Home address.
+- Use only the browser tools. Stay on blinkit.com. The owner is already logged in.
+- Work in the one tab that is in front. If there are other tabs, close them first.
+- Deliver to ${ADDRESS ? `the saved address that matches: "${ADDRESS}". If none matches, stop and report it` : 'the saved Home address'}.
 - Read the page with snapshots; don't guess. If a pop-up asks to download the app, choose to continue on web.
 - Payment must be "Pay on delivery" / cash. Never enter card, UPI or wallet details.
+- The cart must end up with exactly what the caller asked for: if it already has items, remove the others and fix
+  the quantities.
 - Never add things the caller didn't ask for. If an item is unavailable or ambiguous, pick the closest common option
   and say so, or stop and report it.`;
 
@@ -39,7 +45,7 @@ open the cart and proceed to checkout until you can see the bill total, the deli
 Select Pay on delivery if it is offered. STOP before the final "Place order" / "Pay" step. Do not place the order.
 
 Finish with one line of JSON and nothing after it:
-{"status":"ready","items":[{"name":"...","quantity":1,"price":68}],"item_total":68,"fees":16,"total":84,"eta":"12 minutes","address":"Home","payment":"Pay on delivery"}
+{"status":"ready","items":[{"name":"...","quantity":1,"price":68}],"item_total":68,"fees":16,"total":84,"eta":"12 minutes","address":"Villa 1, Some Road, City","payment":"Pay on delivery"}
 or {"status":"failed","reason":"..."} if you could not get there (also if Pay on delivery isn't offered).`;
 
 const CONFIRM = (cart) => `${RULES}
@@ -54,7 +60,7 @@ Finish with one line of JSON and nothing after it:
 const TOOLS = [
   'browser_navigate', 'browser_navigate_back', 'browser_snapshot', 'browser_click', 'browser_type',
   'browser_press_key', 'browser_select_option', 'browser_wait_for', 'browser_tabs', 'browser_hover',
-  'browser_handle_dialog', 'browser_fill_form',
+  'browser_handle_dialog', 'browser_fill_form', 'browser_take_screenshot',
 ].map((t) => `mcp__browser__${t}`);
 
 function runClaude(prompt, { resume, onProgress, onEvent }) {
@@ -67,6 +73,9 @@ function runClaude(prompt, { resume, onProgress, onEvent }) {
     let buf = '';
     let sessionId = resume;
     let finalText = '';
+    // A text block is spoken only once Claude goes on to use a tool: the last one is its closing summary, which the
+    // bridge reads out itself from the JSON result.
+    let unsaid = null;
     const timer = setTimeout(() => child.kill('SIGTERM'), TIMEOUT_MS);
     child.stdout.on('data', (d) => {
       buf += d;
@@ -84,9 +93,10 @@ function runClaude(prompt, { resume, onProgress, onEvent }) {
             if (c.type === 'text' && c.text.trim()) {
               const text = c.text.trim();
               finalText = text;
-              const say = text.split('\n').filter((l) => !l.trim().startsWith('{')).join(' ').trim();
-              if (say) onProgress?.(say);
+              unsaid = text.split('\n').filter((l) => !l.trim().startsWith('{')).join(' ').trim() || null;
             } else if (c.type === 'tool_use') {
+              if (unsaid) onProgress?.(unsaid);
+              unsaid = null;
               onProgress?.(null, { tool: c.name.replace('mcp__browser__', ''), input: c.input });
             }
           }
@@ -108,10 +118,12 @@ function runClaude(prompt, { resume, onProgress, onEvent }) {
   });
 }
 
-// Brings Chromium to the front on blinkit.com, so the person watching sees the work.
+// Brings Chromium (its current tab) to the front, so the person watching sees the work. Opening a URL here would
+// start a second tab, and Chromium ignores clicks in a tab that is in the background.
 export function showBrowser() {
   return new Promise((r) => execFile('sudo', ['android',
-    'am start -n org.chromium.chrome/com.google.android.apps.chrome.Main -d https://blinkit.com'], () => r()));
+    'am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n org.chromium.chrome/com.google.android.apps.chrome.Main'],
+    () => r()));
 }
 
 export class BlinkitOrder {
