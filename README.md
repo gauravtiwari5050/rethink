@@ -8,6 +8,7 @@ Where something is a concept rather than working code, it says so.
 | Folder | What it is | Status |
 |---|---|---|
 | [`mcp/`](mcp/) | MCP server that runs **on the phone** so Claude (or any MCP client) can see and operate it | Working |
+| [`phone/linux/`](phone/linux/) | Debian + SSH + Claude Code **on the phone**: SSH in and run `claude` there | Working |
 | [`probe/`](probe/) + [`bridge/`](bridge/) | Call bridge: answers real phone calls with a live voice model, using Android's call-audio APIs | Working; needs a laptop over USB for now |
 | [`site/`](site/) | The launch website, plus the Blender script that renders the concept hardware | Concept renders, labelled as such |
 | `research/` | Notes from bringing up the device | Notes |

@@ -10,3 +10,4 @@ bridge/calls/
 site/render/out/
 mcp/build/
 mcp/out/
+phone/linux/.cache/
