@@ -429,13 +429,13 @@ canvas#scope { width: 100%; height: 120px; display: block; }
 .demos-all { margin-top: clamp(32px, 5vw, 56px); text-align: center; }
 
 
-/* promises */
-.promises { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); }
-.promises div { display: grid; gap: 12px; align-content: start; }
-.promises svg { width: 44px; height: 44px; fill: none; stroke: url(#g1); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.promises h3 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.025em; }
-.promises p { color: var(--mute); line-height: 1.5; }
-@media (max-width: 860px) { .promises { grid-template-columns: 1fr; } }
+/* built for nerds */
+.nerds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(36px, 4vw, 56px) clamp(24px, 4vw, 56px); }
+.nerds > div { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.nerds h3 { font-size: 1.45rem; font-weight: 600; letter-spacing: -0.025em; }
+.nerds p { color: var(--mute); line-height: 1.5; }
+.nerds code { justify-self: start; max-width: 100%; overflow-x: auto; white-space: nowrap; margin-top: 4px; padding: 8px 12px; border-radius: 10px; background: #1d1d1f; color: #c7c7cc; font: 400 0.78rem/1.4 var(--font-mono); }
+@media (max-width: 860px) { .nerds { grid-template-columns: 1fr; } }
 
 /* build log */
 .road { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: relative; }
@@ -874,28 +874,43 @@ blinkit_confirm()
   </div>
 </section>
 
-<!-- ================= PROMISES ================= -->
-<section class="band alt" id="promises">
+<!-- ================= BUILT FOR NERDS ================= -->
+<section class="band alt" id="nerds">
   <div class="wrap">
     <div class="head center reveal">
-      <p class="eyebrow">Promises</p>
-      <h2>Your calls.<br><span class="sheen">Your rules.</span></h2>
+      <p class="eyebrow">Under the hood</p>
+      <h2>Built for <span class="sheen">nerds.</span></h2>
     </div>
-    <div class="promises">
+    <div class="nerds">
       <div class="reveal">
-        <svg viewBox="0 0 44 44"><rect x="9" y="19" width="26" height="19" rx="5"/><path d="M15 19v-5a7 7 0 0 1 14 0v5"/><circle cx="22" cy="28.5" r="2.5"/></svg>
-        <h3>It says it’s an assistant.</h3>
-        <p>Rethink never pretends to be you, and never clones your voice.</p>
+        <h3>Stock LineageOS.</h3>
+        <p>No custom ROM, kernel or modem patches. Rooted debugging is all it needs.</p>
+        <code>adb root</code>
       </div>
       <div class="reveal">
-        <svg viewBox="0 0 44 44"><path d="M22 6 8 12v9c0 9 6 15 14 17 8-2 14-8 14-17v-9z"/><path d="m16 22 4 4 8-8"/></svg>
-        <h3>It only claims what it did.</h3>
-        <p>If something fails, the caller is told.</p>
+        <h3>Debian in your pocket.</h3>
+        <p>Debian 13 in a chroot on the phone, with SSH, Node and Claude Code.</p>
+        <code>ssh -p 2222 rethink@phone</code>
       </div>
       <div class="reveal">
-        <svg viewBox="0 0 44 44"><rect x="12" y="5" width="20" height="34" rx="5"/><path d="M19 33h6"/><path d="M8 16v12M36 16v12"/></svg>
-        <h3>It lives on your phone.</h3>
-        <p>Transcripts and notes are stored on the device, not on a Rethink server.</p>
+        <h3>Root in one command.</h3>
+        <p>Runs in Android’s own root shell. Every call is logged.</p>
+        <code>sudo android input tap 540 1200</code>
+      </div>
+      <div class="reveal">
+        <h3>Plain MCP.</h3>
+        <p>13 tools over Streamable HTTP, served from the phone. Any MCP client works.</p>
+        <code>http://127.0.0.1:7071/mcp</code>
+      </div>
+      <div class="reveal">
+        <h3>Pinned and checksummed.</h3>
+        <p>Debian 13.7, Claude Code 2.1.330, Chromium 160, Termux 0.118.3, Playwright MCP 0.0.84.</p>
+        <code>shasum -a 256 -c -</code>
+      </div>
+      <div class="reveal">
+        <h3>MIT, and reproducible.</h3>
+        <p>Every experiment ships its video, raw log and <a class="link" href="/setup/">step-by-step setup</a>. <a class="link" href="https://github.com/gauravtiwari5050/rethink">Source on GitHub</a>.</p>
+        <code>./phone/linux/setup.sh</code>
       </div>
     </div>
   </div>
