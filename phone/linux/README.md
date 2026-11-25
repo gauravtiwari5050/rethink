@@ -36,7 +36,7 @@ With the phone on USB and on the same Wi-Fi as your computer:
 
 ```sh
 ./phone/linux/setup.sh     # once: downloads and verifies Debian (28 MB), installs ssh + Claude Code (~3 min)
-./phone/linux/start.sh     # after each reboot: starts the SSH and MCP servers; prints the phone's address
+./phone/linux/start.sh     # after each reboot: starts SSH, the MCP server and the call bridge; prints the phone's address
 ssh -i ~/.ssh/rethink_phone -p 2222 rethink@<phone address>
 claude                     # first time: sign in, then ask it to do something on the phone
 ```
@@ -54,6 +54,34 @@ This installs [Termux](https://github.com/termux/termux-app) (v0.118.3, the offi
 gives it OpenSSH from Termux's package repository, and creates a key that never leaves the phone. It also adds a
 `debian` command. Termux's OpenSSH comes from its rolling package repository, so that one piece isn't pinned. On the phone, open Termux, type `debian`, then `claude`. Termux runs as an ordinary app
 without root, so it gets into Debian over SSH on `127.0.0.1:2222`, the same way your computer does.
+
+## The call bridge, on the phone
+
+`start.sh` also pushes [`bridge/`](../../bridge/) into Debian (`/opt/rethink/bridge`), installs its packages, and
+starts it with the call answering from [`probe/`](../../probe/). Nothing runs on the computer: unplug USB after it
+finishes. Its settings live in `/opt/rethink/bridge/.env` on the phone, copied from your `bridge/.env` the first time
+only. After that, edit it on the phone.
+
+| Setting | |
+|---|---|
+| `OPENAI_API_KEY` | Required. The voice model |
+| `OWNER_NAME`, `OWNER_CONTEXT` | Who the assistant answers for |
+| `ORDER_ALLOWED_CALLERS` | Comma-separated numbers allowed to order. Empty: nobody can |
+| `DELIVERY_ADDRESS` | Which saved Blinkit address to deliver to, e.g. its first line |
+| `MAX_ORDER_RUPEES` | Refuse orders above this total. Default 500 |
+
+Call log: `tail -f /opt/rethink/bridge/bridge.log` in Debian. Recordings of each call are saved next to it.
+
+### Ordering on Blinkit
+
+```sh
+./phone/linux/browser.sh   # once: installs a pinned, checksummed Chromium on the phone
+```
+
+Open Chromium on the phone and log in to blinkit.com. When an allowed caller asks for groceries, the bridge starts
+Claude Code headless on the phone with only the browser tools ([Playwright MCP](https://github.com/microsoft/playwright-mcp)
+over Chromium's DevTools port). It fills the cart and stops at checkout. The order is placed only after the caller
+says yes, and only with pay on delivery. See [Experiment 03](https://rethinkphone.tech/experiments/a-phone-call-orders-groceries/).
 
 ### Stopping and removing
 

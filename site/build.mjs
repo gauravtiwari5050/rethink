@@ -1,12 +1,21 @@
 // Builds the static site into dist/: the launch page, the experiments (Markdown → HTML), an RSS feed and a sitemap.
 //   node build.mjs            → dist/   (DRAFTS=1 includes drafts)
 //   SITE_URL=https://example.tech node build.mjs
-// Source of truth: index.html (the page, also previewable as-is), experiments/*.md, assets/.
+// Source of truth: index.html (the page, also previewable as-is), experiments/*.md, assets/,
+// and ../docs/ (setup and reproduction guides, rendered at /setup/ and /experiments/<slug>/reproduce/).
 import fs from 'node:fs';
 import path from 'node:path';
-import { marked } from 'marked';
+import { createHash } from 'node:crypto';
+import { marked, Marked } from 'marked';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
+// GitHub-style "> [!WARNING]" blockquotes become a warning box, as they look on GitHub.
+const blockquote = function ({ tokens }) {
+  const body = this.parser.parse(tokens);
+  const m = body.match(/^<p>\[!WARNING\]\s*/);
+  return m ? `<div class="warn" role="note"><p class="warn-t">Warning</p><p>${body.slice(m[0].length)}</div>\n` : `<blockquote>\n${body}</blockquote>\n`;
+};
+marked.use({ renderer: { blockquote } });
 const OUT = path.join(HERE, 'dist');
 const SITE = (process.env.SITE_URL || 'https://rethinkphone.tech').replace(/\/$/, '');
 const NAME = 'Rethink Phone';
@@ -30,7 +39,7 @@ const svgDefs = page.match(/<svg width="0" height="0"[\s\S]*?<\/svg>/)[0];
 write('assets/site.css', css);
 
 const expLink = '<a href="/experiments/">Experiments</a>';
-page = page.replace('<a href="#plan">Roadmap</a>', `<a href="#plan">Roadmap</a>\n      ${expLink}`);
+page = page.replace('<a href="#hear">Hear it</a>', `<a href="#hear">Hear it</a>\n      ${expLink}`);
 
 const head = ({ title, description, url, image = `${SITE}/assets/og.jpg`, type = 'website', extra = '' }) => `<!doctype html>
 <html lang="en">
@@ -64,6 +73,36 @@ const body = page
   .replace(/<meta name="description"[^>]*>\n?/, '');
 write('index.html', head({ title, description, url: `${SITE}/` }) + body + '\n</html>\n');
 
+// ---------- docs (../docs): setup and reproduction guides, also read on GitHub ----------
+// Links in them are relative to the repository, so they work on GitHub; here they're mapped to site pages,
+// or to the file on GitHub.
+const REPO = 'https://github.com/gauravtiwari5050/rethink';
+const DOCS = path.join(HERE, '..', 'docs');
+const slugify = (t) => t.toLowerCase().replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, '').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
+const docLink = (from, href) => {
+  if (/^([a-z]+:|\/|#)/.test(href)) return href;
+  const [p, frag = ''] = href.split('#');
+  const to = path.posix.normalize(path.posix.join(path.posix.dirname(from), p));
+  const hash = frag ? `#${frag}` : '';
+  if (to === 'docs/setup.md') return `/setup/${hash}`;
+  const m = to.match(/^docs\/reproduce\/\d+-(.+)\.md$/);
+  if (m) return `/experiments/${m[1]}/reproduce/${hash}`;
+  return `${REPO}/tree/main/${to.replace(/\/$/, '')}${hash}`;
+};
+let docRel = '';
+const docMarked = new Marked({
+  walkTokens: (t) => { if (t.type === 'link') t.href = docLink(docRel, t.href); },
+  renderer: { blockquote, heading({ tokens, depth }) { const inner = this.parser.parseInline(tokens); return `<h${depth} id="${slugify(inner)}">${inner}</h${depth}>\n`; } },
+});
+const renderDoc = (rel) => {
+  const raw = fs.readFileSync(path.join(HERE, '..', rel), 'utf8');
+  const [, title, md] = raw.match(/^# (.+)\n([\s\S]*)$/);
+  docRel = rel;
+  return { title, html: docMarked.parse(md) };
+};
+const reproFor = (slug) => (fs.existsSync(path.join(DOCS, 'reproduce')) ? fs.readdirSync(path.join(DOCS, 'reproduce')) : [])
+  .find((f) => f.replace(/^\d+-/, '').replace(/\.md$/, '') === slug);
+
 // ---------- experiments ----------
 // Each experiment is a product feature tried on the real phone: experiments/NN-slug.md, numbered by filename.
 const expDir = path.join(HERE, 'experiments');
@@ -85,15 +124,17 @@ const exps = (fs.existsSync(expDir) ? fs.readdirSync(expDir) : [])
   .filter((p) => !p.draft || process.env.DRAFTS === '1')
   .sort((a, b) => b.num.localeCompare(a.num));
 
-const subHead = (o) => head({ ...o, extra: `${fontLinks}\n<link rel="stylesheet" href="/assets/site.css">\n<link rel="stylesheet" href="/assets/experiments.css">` });
+// assets are cached for a day; a content hash in the URL makes style changes show at once
+const cssVer = createHash('sha256').update(css + fs.readFileSync(path.join(HERE, 'assets/experiments.css'))).digest('hex').slice(0, 10);
+const subHead = (o) => head({ ...o, extra: `${fontLinks}\n<link rel="stylesheet" href="/assets/site.css?v=${cssVer}">\n<link rel="stylesheet" href="/assets/experiments.css?v=${cssVer}">` });
 const siteHeader = header
   .replace('href="#top"', 'href="/"')
   .replace(/href="#(\w+)"/g, 'href="/#$1"')
-  .replace('<a href="/#plan">Roadmap</a>', `<a href="/#plan">Roadmap</a>\n      ${expLink}`);
+  .replace('<a href="/#hear">Hear it</a>', `<a href="/#hear">Hear it</a>\n      ${expLink}`);
 const fmtDate = (d) => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 const statusTag = (s) => `<span class="status" data-s="${s === 'Working' ? 'ok' : s === 'In progress' ? 'wip' : 'no'}">${esc(s)}</span>`;
 const footer = `<footer class="bfoot"><div class="wrap"><span>${NAME}. Open source, MIT.</span><a href="https://github.com/gauravtiwari5050/rethink">Source</a><a href="/experiments/feed.xml">RSS</a></div></footer>`;
-const EXP_DESC = 'Features we are building into Rethink Phone, tried on a real handset. Each one says whether it works, and how to reproduce it.';
+const EXP_DESC = 'Features tried on a real handset, with a video, a log, and how to reproduce them.';
 
 for (const p of exps) {
   const url = `${SITE}/experiments/${p.slug}/`;
@@ -106,7 +147,7 @@ ${siteHeader}
   <p class="meta"><a href="/experiments/">Experiments</a> · No. ${p.num} · <time datetime="${p.date}">${fmtDate(p.date)}</time></p>
   <h1>${esc(p.title)}</h1>
   <p class="standfirst">${esc(p.summary)}</p>
-  <p class="tags">${statusTag(p.status)}</p>
+  <p class="tags">${statusTag(p.status)}${reproFor(p.slug) ? ` <a class="link" href="/experiments/${p.slug}/reproduce/">Reproduce it ›</a>` : ''}</p>
   <article class="prose">
 ${p.html}
   </article>
@@ -117,6 +158,37 @@ ${footer}
 `);
 }
 
+const docPage = ({ rel, url, crumb, description }) => {
+  const d = renderDoc(rel);
+  write(url.replace(/^\//, '') + 'index.html', subHead({ title: `${d.title} · ${NAME}`, description, url: `${SITE}${url}`, type: 'article' }) + `
+</head>
+<body>
+${svgDefs}
+${siteHeader}
+<main class="post wrap">
+  <p class="meta">${crumb} · <a href="${REPO}/blob/main/${rel}">Source on GitHub</a></p>
+  <h1>${esc(d.title)}</h1>
+  <article class="prose">
+${d.html}
+  </article>
+</main>
+${footer}
+</body>
+</html>
+`);
+};
+const docUrls = [];
+if (fs.existsSync(path.join(DOCS, 'setup.md'))) {
+  docPage({ rel: 'docs/setup.md', url: '/setup/', crumb: '<a href="/experiments/">Experiments</a>', description: 'Set up a rooted LineageOS phone, Debian and Claude Code for the Rethink Phone experiments.' });
+  docUrls.push('/setup/');
+}
+for (const p of exps) {
+  const f = reproFor(p.slug);
+  if (!f) continue;
+  docPage({ rel: `docs/reproduce/${f}`, url: `/experiments/${p.slug}/reproduce/`, crumb: `<a href="/experiments/">Experiments</a> · <a href="/experiments/${p.slug}/">No. ${p.num}</a>`, description: `Step-by-step: reproduce Experiment ${p.num}, ${p.title}.` });
+  docUrls.push(`/experiments/${p.slug}/reproduce/`);
+}
+
 write('experiments/index.html', subHead({ title: `Experiments · ${NAME}`, description: EXP_DESC, url: `${SITE}/experiments/` }) + `
 </head>
 <body>
@@ -124,7 +196,7 @@ ${svgDefs}
 ${siteHeader}
 <main class="expindex wrap">
   <h1>Experiments</h1>
-  <p class="standfirst">${EXP_DESC}</p>
+  <p class="standfirst">${EXP_DESC} Start with <a href="/setup/">Set up your phone</a>.</p>
   <ol class="list">
 ${exps.length ? exps.map((p) => `    <li><a href="/experiments/${p.slug}/"><span class="no">No. ${p.num}</span><b>${esc(p.title)}</b><span class="sum">${esc(p.summary)}</span><span class="side">${statusTag(p.status)}<time datetime="${p.date}">${fmtDate(p.date)}</time></span></a></li>`).join('\n') : '    <li class="empty">The first experiment is on its way.</li>'}
   </ol>
@@ -149,7 +221,7 @@ ${exps.map((p) => `<item><title>Experiment ${p.num}: ${esc(p.title)} (${esc(p.st
 
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[`${SITE}/`, `${SITE}/experiments/`, ...exps.map((p) => `${SITE}/experiments/${p.slug}/`)].map((u) => `<url><loc>${u}</loc></url>`).join('\n')}
+${[`${SITE}/`, `${SITE}/experiments/`, ...exps.map((p) => `${SITE}/experiments/${p.slug}/`), ...docUrls.map((u) => `${SITE}${u}`)].map((u) => `<url><loc>${u}</loc></url>`).join('\n')}
 </urlset>
 `);
 write('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`);

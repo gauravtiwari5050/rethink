@@ -25,10 +25,13 @@ draft: true
 ---
 
 ## What it does
-## Try it
+## Reproduce it
 ## How it works
 ## Limits
 ```
+
+Step-by-step reproduction goes in `../docs/reproduce/NN-slug.md` (same slug). It's rendered at
+`/experiments/slug/reproduce/` and linked from the experiment. `../docs/setup.md` is rendered at `/setup/`.
 
 Drafts (`draft: true`) are left out of the build. Remove that line to publish. The page appears at
 `/experiments/slug/`. The status is shown on the page, so update it as the feature changes.
