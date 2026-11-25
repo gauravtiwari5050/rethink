@@ -3,7 +3,7 @@
 # modes:
 #   preview          three angles at low samples, for checking the look
 #   seq <n>          scroll turntable: front 3/4 -> profile -> back, n frames
-#   flat             phone lying face-up, incoming-call screen
+#   flat             phone lying face-up, incoming call from an unknown number
 import bpy, bmesh, math, sys, os
 from mathutils import Vector
 
@@ -321,7 +321,7 @@ elif MODE == 'flip':
 elif MODE == 'flat':
     for o in scene.objects:
         if o.type == 'LIGHT': o.visible_glossy = False
-    sc = screen(os.path.join(SCREENS, 'screen-ring.png')); sc.parent = rig
+    sc = screen(os.path.join(SCREENS, 'screen-call.png')); sc.parent = rig
     # lie the phone face-up on the floor, turned slightly
     rig.rotation_euler = (math.radians(-90), 0, math.radians(-18))
     rig.location = (0, 0, -H / 2 - 0.16 + T / 2 + 0.001)
