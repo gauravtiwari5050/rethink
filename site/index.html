@@ -1,12 +1,12 @@
 <title>Rethink Phone</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Rethink Phone is a new kind of phone, rebuilt from first principles. It answers your calls, runs on your voice, and does what you ask.">
+<meta name="description" content="Rethink Phone: your digital chief of staff. Running today on a OnePlus Nord CE 3 Lite.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&family=Martian+Mono:wdth,wght@87.5,400..500&display=swap">
 <style>
-/* Layout: a product launch on white. The story comes first (what a phone was for, what it became,
-   what it should be), told in sticky scenes; then the product, the proof, the platform and the plan.
+/* Layout: a tech experiment, presented on white. The story comes first (what a phone was for, what it became,
+   what it should be), told in sticky scenes; then the design, the proof, the platform and the build log.
    Phones are dark objects on a bright stage. Footnotes back every claim. */
 :root {
   --bg: #ffffff;
@@ -344,7 +344,7 @@ canvas#scope { width: 100%; height: 120px; display: block; }
 .lines li.done { color: #424245; }
 @media (max-width: 900px) { .player { grid-template-columns: 1fr; } .lines { border-left: 0; border-top: 1px solid var(--hair); max-height: 420px; } }
 
-.nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(60px, 9vw, 110px); }
+.nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: clamp(60px, 9vw, 110px); }
 .nums div { padding: 0 clamp(10px, 2vw, 28px); display: grid; gap: 10px; align-content: start; }
 .nums div + div { border-left: 1px solid var(--line); }
 .nums b { font: 600 clamp(2.6rem, 6.2vw, 5.2rem)/0.95 var(--font-display); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -417,33 +417,17 @@ canvas#scope { width: 100%; height: 120px; display: block; }
 .ext pre .k { color: #ff7ab2; }
 .ext pre .s { color: #5fe08a; }
 
-/* business */
-.bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
-.tile { background: var(--bg); border: 1px solid var(--line); border-radius: 22px; padding: clamp(22px, 3vw, 36px); display: flex; flex-direction: column; gap: 14px; min-width: 0; overflow: hidden; }
-.tile .who { font: 600 0.82rem var(--font-body); color: var(--mute); }
-.tile h3 { font-size: clamp(1.5rem, 2.6vw, 2.2rem); font-weight: 600; line-height: 1.02; }
-.tile p { color: var(--mute); font-size: 0.98rem; line-height: 1.45; max-width: 46ch; }
-.tile.w4 { grid-column: span 4; }
-.tile.w2 { grid-column: span 2; }
-.tile .big { font: 600 clamp(3rem, 6vw, 5rem)/0.9 var(--font-display); letter-spacing: -0.04em; }
-.slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: auto; }
-.slots span { padding: 10px 6px; border-radius: 12px; text-align: center; font: 500 0.78rem var(--font-body); font-variant-numeric: tabular-nums; background: var(--bg); border: 1px solid var(--hair); color: var(--mute); }
-.slots span.taken { background: #e8e8ed; text-decoration: line-through; color: #a1a1a6; }
-.slots span.new { background: var(--fg); color: #fff; font-weight: 600; }
-.scam { margin-top: auto; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--bg); }
-.scam i { width: 34px; height: 34px; border-radius: 50%; background: var(--red); display: grid; place-items: center; flex: none; font: 600 1rem var(--font-display); color: #fff; font-style: normal; }
-.scam span { font-size: 0.85rem; line-height: 1.35; }
-.lang { margin-top: auto; display: flex; flex-wrap: wrap; gap: 8px; }
-.lang span { padding: 7px 12px; border-radius: 99px; background: var(--bg); border: 1px solid var(--line); font: 600 0.85rem var(--font-body); }
-.compare { margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.compare > div { border-radius: 22px; padding: clamp(22px, 3vw, 36px); border: 1px solid var(--line); }
-.compare h4 { margin-bottom: 6px; font: 600 1.5rem var(--font-display); letter-spacing: -0.03em; }
-.compare .pr2 { font: 500 0.82rem var(--font-body); font-variant-numeric: tabular-nums; color: var(--mute); }
-.compare ul { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
-.compare li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; font-size: 0.98rem; }
-.compare li::before { content: ""; width: 12px; height: 12px; margin-top: 5px; border-radius: 50%; background: var(--sheen); }
-.illus { margin-top: 26px; font-size: 0.82rem; color: var(--mute); }
-@media (max-width: 900px) { .tile.w4, .tile.w2 { grid-column: span 6; } .compare { grid-template-columns: 1fr; } }
+/* demos */
+.demos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 760px) { .demos { grid-template-columns: minmax(0, 1fr); gap: 44px; } }
+.demo { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.demo video { width: 100%; aspect-ratio: 4 / 5; object-fit: contain; background: #000; border-radius: 20px; display: block; }
+.demo .when { font: 500 0.74rem var(--font-body); font-variant-numeric: tabular-nums; color: var(--mute); letter-spacing: 0.02em; margin-top: 6px; }
+.demo h3 { font: 600 1.45rem/1.1 var(--font-display); letter-spacing: -0.03em; }
+.demo p { color: var(--mute); font-size: 0.95rem; line-height: 1.45; }
+.demo .link { align-self: flex-start; }
+.demos-all { margin-top: clamp(32px, 5vw, 56px); text-align: center; }
+
 
 /* promises */
 .promises { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); }
@@ -453,10 +437,10 @@ canvas#scope { width: 100%; height: 120px; display: block; }
 .promises p { color: var(--mute); line-height: 1.5; }
 @media (max-width: 860px) { .promises { grid-template-columns: 1fr; } }
 
-/* roadmap + funds */
+/* build log */
 .road { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: relative; }
 .road::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--line); }
-.road::after { content: ""; position: absolute; left: 0; width: calc(100% / 6 * 1.05); top: 7px; height: 2px; background: var(--sheen); }
+.road::after { content: ""; position: absolute; left: 0; width: calc(100% / 6 * 5); top: 7px; height: 2px; background: var(--sheen); }
 .road div { padding-right: 18px; display: grid; gap: 8px; align-content: start; position: relative; padding-top: 34px; min-width: 0; }
 .road div::before { content: ""; position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-2); border: 2px solid var(--line); z-index: 1; }
 .road div.done::before { background: var(--light); border-color: #12a656; box-shadow: 0 0 8px 1px var(--glow); }
@@ -465,23 +449,18 @@ canvas#scope { width: 100%; height: 120px; display: block; }
 .road div.done b { color: var(--green); }
 .road h4 { font: 600 1.12rem/1.2 var(--font-display); letter-spacing: -0.02em; }
 .road p { font-size: 0.88rem; color: var(--mute); line-height: 1.45; }
+.road h4 a { color: inherit; text-decoration: none; }
+.road h4 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.loglink { margin-top: 40px; }
+.chat > .link { align-self: flex-start; }
+.chat .made code { font: 400 0.72rem/1.5 var(--font-mono); color: var(--fg); overflow-wrap: anywhere; }
 @media (max-width: 900px) {
   .road { grid-template-columns: 1fr; gap: 26px; padding-left: 30px; }
   .road::before { left: 7px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
-  .road::after { left: 7px; top: 0; width: 2px; height: 18%; }
+  .road::after { left: 7px; top: 0; width: 2px; height: 84%; }
   .road div { padding-top: 0; }
   .road div::before { left: -30px; top: 2px; }
 }
-.funds { margin-top: clamp(80px, 12vw, 140px); display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
-.askbig { font: 600 clamp(4.4rem, 11vw, 9rem)/0.9 var(--font-display); letter-spacing: -0.045em; margin: 10px 0 18px; }
-.stack { display: flex; height: 18px; border-radius: 99px; overflow: hidden; gap: 3px; margin-bottom: 26px; }
-.stack i { display: block; height: 100%; }
-.alloc div { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 14px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--line); }
-.alloc div i { width: 10px; height: 10px; border-radius: 3px; display: block; }
-.alloc b { font: 600 1.05rem var(--font-display); letter-spacing: -0.01em; }
-.alloc span { display: block; color: var(--mute); font-size: 0.88rem; margin-top: 2px; }
-.alloc em { font: 600 1.05rem var(--font-display); font-style: normal; font-variant-numeric: tabular-nums; }
-@media (max-width: 860px) { .funds { grid-template-columns: 1fr; } }
 
 /* finale */
 .finale { text-align: center; padding-block: clamp(110px, 16vw, 210px); position: relative; overflow: hidden; background: var(--bg); }
@@ -493,6 +472,8 @@ canvas#scope { width: 100%; height: 120px; display: block; }
 .founder i { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); display: grid; place-items: center; font: 600 1.1rem var(--font-display); font-style: normal; flex: none; }
 .founder span { font-size: 0.92rem; color: var(--mute); line-height: 1.4; }
 .founder b { color: var(--fg); font-weight: 600; }
+.founder a { color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.founder a:hover { text-decoration-color: var(--fg); }
 .mail { display: inline-flex; align-items: center; gap: 4px; padding: 6px 6px 6px 20px; border-radius: 99px; background: var(--bg-2); border: 1px solid var(--hair); max-width: 100%; }
 .mail code { font: 500 0.95rem var(--font-mono); user-select: all; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
@@ -523,12 +504,10 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <nav aria-label="Sections">
       <a href="#hero">Design</a>
       <a href="#story">Why</a>
+      <a href="#demos">Demos</a>
       <a href="#principles">Principles</a>
       <a href="#answer">Calls</a>
       <a href="#hear">Hear it</a>
-      <a href="#platform">Platform</a>
-      <a href="#business">Business</a>
-      <a href="#plan">Roadmap</a>
     </nav>
     <a class="pill" href="#hear">Hear the first call</a>
   </div>
@@ -542,7 +521,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <div class="hero-copy" id="heroCopy">
       <p class="eyebrow in" style="animation-delay:.05s"><span class="lamp"></span>Rethink Phone</p>
       <h1><span class="ln"><span style="animation-delay:.12s">A new kind</span></span><span class="ln"><span style="animation-delay:.24s">of <span class="sheen">phone.</span></span></span></h1>
-      <p class="lead in" style="animation-delay:.4s">We took the phone apart and asked what it’s actually for. Then we rebuilt it <b>from first principles</b>, around one assistant that works for you.</p>
+      <p class="lead in" style="animation-delay:.4s">Your digital chief of staff.</p>
       <div class="ctas in" style="animation-delay:.55s">
         <a class="pill big" href="#story">Watch the story</a>
         <a class="link" href="#hear">Hear it answer a real call</a>
@@ -551,11 +530,11 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <div class="turn" id="turn">
       <img id="turnImg" src="assets/phone/f000.webp" width="800" height="1000" alt="Rethink Phone concept render. The home screen shows one assistant and a summary of the calls it answered.">
       <canvas id="turnCv" width="800" height="1000" aria-hidden="true"></canvas>
-      <p class="callout c1" id="c1"><b>8.7 mm</b><span>Bead‑blasted aluminium frame. Nothing to fidget with.</span></p>
-      <p class="callout c2" id="c2"><b>One lens, one light</b><span>The light rings the camera and glows while Rethink is on a call.</span></p>
-      <p class="callout c3" id="c3"><b>Teletype</b><span>A strip display on the back prints what Rethink hears and thinks, live.</span></p>
+      <p class="callout c1" id="c1"><b>8.7 mm</b><span>Bead‑blasted aluminium frame.</span></p>
+      <p class="callout c2" id="c2"><b>One lens, one light</b><span>Glows while Rethink is on a call.</span></p>
+      <p class="callout c3" id="c3"><b>Teletype</b><span>Prints what Rethink hears and thinks, live.</span></p>
     </div>
-    <p class="fig hero-fig" id="heroFig"><b>Fig. 1</b><span>Concept render of Rethink hardware. The software runs today on a OnePlus Nord CE 3 Lite.<sup class="fn"><a href="#fn5">5</a></sup></span></p>
+    <p class="fig hero-fig" id="heroFig"><b>Fig. 1</b><span>Concept render of Rethink hardware. The software runs today on a OnePlus Nord CE 3 Lite.<sup class="fn"><a href="#fn4">4</a></sup></span></p>
   </div>
 </section>
 
@@ -568,12 +547,12 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <div class="step on">
             <p class="k">1876</p>
             <h2>The phone did<br>one thing.</h2>
-            <p class="lead">You picked it up and <b>talked to a person.</b> That was the whole idea, and it changed the world.</p>
+            <p class="lead">You picked it up and <b>talked to a person.</b></p>
           </div>
           <div class="step">
             <p class="k">2007</p>
             <h2>Then it became<br>a computer.</h2>
-            <p class="lead">A screen, a grid of apps, the internet in your pocket. <b>A brilliant tool</b>, as long as you were the one using it.</p>
+            <p class="lead">A screen, a grid of apps, the internet in your pocket.</p>
           </div>
           <div class="step">
             <p class="k">Today</p>
@@ -583,7 +562,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <div class="step">
             <p class="k">From here</p>
             <h2>So we started<br><span class="sheen">over.</span></h2>
-            <p class="lead">No grid. No app to open first. <b>One assistant that knows your phone</b> and does the work, starting with your calls.</p>
+            <p class="lead">No grid. <b>One assistant</b> that does the work, starting with your calls.</p>
           </div>
         </div>
         <div class="progress" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -611,11 +590,46 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
   </div>
 </section>
 
+<!-- ================= DEMOS ================= -->
+<section class="band alt" id="demos">
+  <div class="wrap">
+    <div class="head center reveal">
+      <p class="eyebrow"><span class="lamp"></span>Demos</p>
+      <h2>Working today.</h2>
+      <p class="lead">Real phone, unedited takes, each with its log.</p>
+    </div>
+    <div class="demos reveal">
+      <article class="demo">
+        <video controls preload="none" playsinline poster="/assets/experiments/03/poster.jpg" src="/assets/experiments/03/blinkit-order.mp4"></video>
+        <p class="when">No. 03 · 22 Nov 2026</p>
+        <h3>A phone call orders groceries</h3>
+        <p>I call and ask for milk. Claude shops on Blinkit in the phone’s browser, reads back the cart, and orders when I say yes.</p>
+        <a class="link" href="/experiments/a-phone-call-orders-groceries/">Experiment 03 ›</a>
+      </article>
+      <article class="demo">
+        <video controls preload="none" playsinline poster="/assets/experiments/02/poster.jpg" src="/assets/experiments/02/claude-on-the-phone.mp4"></video>
+        <p class="when">No. 02 · 22 Nov 2026</p>
+        <h3>Claude runs on the phone, with root</h3>
+        <p>Claude Code in a Debian chroot on the handset. Asked to call Gaurav, it queries contacts and dials with <code>am start</code>.</p>
+        <a class="link" href="/experiments/claude-runs-on-the-phone/">Experiment 02 ›</a>
+      </article>
+      <article class="demo">
+        <video controls preload="none" playsinline poster="/assets/experiments/01/poster.jpg" src="/assets/experiments/01/claude-calls.mp4"></video>
+        <p class="when">No. 01 · 22 Nov 2026</p>
+        <h3>Claude operates the phone</h3>
+        <p>An MCP server on the phone: read the screen, place a call, hang up. Every tool call in an audit log.</p>
+        <a class="link" href="/experiments/claude-operates-the-phone/">Experiment 01 ›</a>
+      </article>
+    </div>
+    <p class="demos-all reveal"><a class="link" href="/experiments/">All experiments ›</a></p>
+  </div>
+</section>
+
 <!-- ================= STATEMENT ================= -->
 <section class="scene" id="statement" data-scene="statement">
   <div class="pin">
     <div class="wrap">
-      <p class="words" id="words">We didn’t add AI to a phone. We asked what a phone is for, kept the answer, and rebuilt *everything *else *around *it.</p>
+      <p class="words" id="words">You carry a supercomputer in your pocket. About time we *treat *it *like *one.</p>
     </div>
   </div>
 </section>
@@ -624,22 +638,22 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <section class="band" id="principles">
   <div class="wrap">
     <div class="head center reveal">
-      <p class="eyebrow">First principles</p>
-      <h2>Three ideas.<br>One new phone.</h2>
+      <p class="eyebrow">Principles</p>
+      <h2>Three ideas.</h2>
     </div>
     <div class="principles">
       <div class="pr reveal">
         <p class="n">Principle 1</p>
         <p class="from">You work for your phone</p>
         <h3>Your phone works for <span class="sheen">you.</span></h3>
-        <p>It answers calls, takes messages and books appointments while you get on with your day. Then it tells you what happened.</p>
+        <p>It answers calls, takes messages and books appointments, then tells you what happened.</p>
         <a class="link" href="#answer">See a call ›</a>
       </div>
       <div class="pr reveal">
         <p class="n">Principle 2</p>
         <p class="from">Tap through a grid of apps</p>
         <h3>Talking is the <span class="sheen">interface.</span></h3>
-        <p>Ask for what you want in your own words. Rethink reaches into WhatsApp, calls and notifications for you. Apps are still there when you want them.</p>
+        <p>Rethink reaches into WhatsApp, calls and notifications for you. Apps are still there when you want them.</p>
         <a class="link" href="#hear">Hear it ›</a>
       </div>
       <div class="pr reveal">
@@ -667,17 +681,17 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <div class="step">
             <p class="k">Answer</p>
             <h2>Rethink <span class="sheen">answers.</span></h2>
-            <p class="lead">It picks up on the second ring, says it’s your assistant, and asks how it can help. <b>A natural voice, not a menu.</b></p>
+            <p class="lead">It picks up on the second ring, says it’s your assistant, and asks how it can help.</p>
           </div>
           <div class="step">
             <p class="k">Converse</p>
             <h2>It listens.<br>It thinks. It talks.</h2>
-            <p class="lead">Replies land in about a second. It can look things up, take a message, or book a slot, and <b>it never claims to have done something it hasn’t.</b></p>
+            <p class="lead">Replies in about a second. It looks things up, takes messages and books slots.</p>
           </div>
           <div class="step">
             <p class="k">Brief</p>
             <h2>Then it tells you.</h2>
-            <p class="lead">It hangs up politely and leaves one clear note: <b>who called, what they wanted, and what to do next.</b></p>
+            <p class="lead">One note: <b>who called, what they wanted, what to do next.</b></p>
           </div>
         </div>
         <div class="progress" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -701,9 +715,9 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <h2>Turn it over.<br>Watch it think.</h2>
       <p class="lead">One camera, ringed by the light. Below it, a teletype prints what Rethink hears and <b>what it is thinking</b>, line by line, while it handles your call.</p>
       <ul class="back-spec">
-        <li><b>One lens</b><span>A single camera. The light lives around it, so you can see at a glance when Rethink is on a call.</span></li>
-        <li><b>Teletype</b><span>A low‑power strip display. Caller, plan and reply in real time, so nothing happens out of sight.</span></li>
-        <li><b>Face down</b><span>Put the phone on the table and read the call without picking it up.</span></li>
+        <li><b>One lens</b><span>The light around it means Rethink is on a call.</span></li>
+        <li><b>Teletype</b><span>A low‑power strip display: caller, plan and reply, in real time.</span></li>
+        <li><b>Face down</b><span>Read the call without picking it up.</span></li>
       </ul>
     </div>
     <figure class="backshot" style="margin:0">
@@ -720,7 +734,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <div class="head reveal">
       <p class="eyebrow">Proof, not a mockup</p>
       <h2>Hear the first<br><span class="sheen">AI‑answered call.</span></h2>
-      <p class="lead">Recorded on <b>18 November 2026</b> on a real Airtel line. The founder called from a second phone. Everything the assistant says was generated live.<sup class="fn"><a href="#fn3">3</a></sup></p>
+      <p class="lead">Recorded on <b>18 November 2026</b> on a real Airtel line. Gaurav Tiwari called from a second phone.<sup class="fn"><a href="#fn3">3</a></sup></p>
     </div>
 
     <div class="player reveal">
@@ -749,7 +763,6 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
     <div class="nums">
       <div class="reveal"><b data-to="1" data-pre="~" data-suf=" s">~1 s</b><span>from the caller’s last word to the assistant’s reply<sup class="fn"><a href="#fn1">1</a></sup></span></div>
-      <div class="reveal"><b data-to="1" data-suf=" day">1 day</b><span>from an empty folder to a working AI‑answered call</span></div>
       <div class="reveal"><b data-to="0">0</b><span>changes to the ROM, kernel, or modem firmware</span></div>
       <div class="reveal"><b data-to="5" data-pre="$0.0">$0.05</b><span>per minute of live conversation<sup class="fn"><a href="#fn2">2</a></sup></span></div>
     </div>
@@ -763,7 +776,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <div class="top">
         <div>
           <p class="eyebrow">Engineering</p>
-          <h2>The hard part was<br>one <span class="sheen">audio route.</span></h2>
+          <h2>How does it <span class="sheen">work?</span></h2>
         </div>
         <div class="capt" id="capt">
           <p class="on">Android 13 added system APIs that let a privileged app <b>hear the caller</b> and <b>speak into the call</b>. On paper.</p>
@@ -809,96 +822,55 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <div class="reveal">
         <p class="eyebrow">Principle 3 · Platform</p>
         <h2>Program&shy;mable.<br><span class="sheen">By talking.</span></h2>
-        <p class="lead">iOS and Android don’t let you script your own phone. Rethink does. Describe what you want and it writes an <b>extension</b>: a small program that runs on the phone, on a trigger, with the permissions you approve.</p>
+        <p class="lead">iOS and Android don’t let you script your own phone. Rethink does. An agent runs on the phone itself, with root, and you tell it what to do in plain words. Next, it will keep what you ask for as an <b>extension</b> that runs on a trigger, with the permissions you approve.</p>
         <div class="layers">
-          <div><b>L6</b><span>Shared extensions <em>· install a snippet from a friend</em></span></div>
-          <div><b>L5</b><span>Extensions you create by chatting</span></div>
-          <div><b>L4</b><span>Triggers <em>· time, call, message, place, battery</em></span></div>
-          <div><b>L3</b><span>Agent runtime on the phone</span></div>
-          <div><b>L2</b><span>Phone powers <em>· calls, SMS, notifications, apps</em></span></div>
-          <div><b>L1</b><span>LineageOS, privileged system app</span></div>
+          <div><b>L6</b><span>Shared extensions <em>· install one from a friend · not yet</em></span></div>
+          <div><b>L5</b><span>Extensions you create by chatting <em>· not yet</em></span></div>
+          <div><b>L4</b><span>Triggers <em>· incoming calls work today; time, message and place are next</em></span></div>
+          <div><b>L3</b><span>Agent runtime on the phone <em>· Claude Code in a small Debian</em></span></div>
+          <div><b>L2</b><span>Phone powers <em>· 13 tools over MCP, or root</em></span></div>
+          <div><b>L1</b><span>LineageOS 24 <em>· rooted debugging on a stock Nord CE 3 Lite</em></span></div>
         </div>
       </div>
-      <div class="chat reveal" aria-label="Example conversation creating an extension">
-        <div class="m u">Every evening, give me the startup funding news from the Valley. Just the big rounds.</div>
-        <div class="m r">Sure. I’ll check at 9 pm, keep rounds over $20M, and read you the top five. Notification or spoken?</div>
-        <div class="m u">Spoken, if I’m not on a call.</div>
+      <div class="chat reveal" aria-label="A real request to Claude on the phone, and the commands it ran">
+        <div class="m u">Can you call Gaurav</div>
         <div class="made">
-          <div class="tt"><i></i>Valley funding digest<span class="on" aria-label="enabled"></span></div>
-          <span>every day 21:00 · web_search · speak · skip if in call</span>
+          <div class="tt"><i></i>What Claude ran, from the phone’s log</div>
+          <span><code>16:18:10&nbsp; content query --uri content://com.android.contacts/data/phones</code></span>
+          <span><code>16:18:16&nbsp; am start -a android.intent.action.CALL -d tel:+91XXXXXXXXXX</code></span>
         </div>
-        <div class="m r">Done. It runs tonight. You can share it as a link.</div>
+        <a class="link" href="/experiments/claude-runs-on-the-phone/">Watch it place the call ›</a>
       </div>
     </div>
   </div>
 
   <div class="rail-head wrap">
-    <h3>Things people could build.<br><span style="color:var(--mute)">In a sentence each.</span></h3>
-    <div class="arrows"><button id="prev" aria-label="Previous extensions"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg></button><button id="next" aria-label="Next extensions"><svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5"/></svg></button></div>
+    <h3>Working today.<br><span style="color:var(--mute)">Each one has a video and a log.</span></h3>
+    <div class="arrows"><button id="prev" aria-label="Previous"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg></button><button id="next" aria-label="Next"><svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5"/></svg></button></div>
   </div>
   <div class="gallery" id="gallery">
-    <article class="ext"><p class="when">on · incoming call · unknown number</p><h4>Screen strangers</h4><p>Unknown numbers talk to Rethink first. Real people get through, sales calls get a polite no.</p><pre><span class="k">on</span>.call(<span class="s">{ known: false }</span>)
-  .screen(<span class="s">"Ask who and why"</span>)
-  .ring(<span class="k">if</span> => it.isPersonal)</pre></article>
-    <article class="ext"><p class="when">on · whatsapp message</p><h4>Read me my messages</h4><p>New WhatsApp messages are summarised and read aloud. Reply by voice, and Rethink sends it.</p><pre><span class="k">on</span>.message(<span class="s">"whatsapp"</span>)
-  .summarise()
-  .speak().replyByVoice()</pre></article>
-    <article class="ext"><p class="when">on · schedule · 21:00</p><h4>Valley funding digest</h4><p>The five biggest rounds of the day, read out in the evening.</p><pre><span class="k">every</span>(<span class="s">"21:00"</span>)
-  .search(<span class="s">"startup funding SF"</span>)
-  .top(5).speak()</pre></article>
-    <article class="ext"><p class="when">on · place · leaving office</p><h4>Commute mode</h4><p>On the move, Rethink takes every call and reads you only what’s urgent.</p><pre><span class="k">on</span>.leave(<span class="s">"office"</span>)
-  .calls(<span class="s">"answer"</span>)
-  .interrupt(<span class="k">if</span> => it.urgent)</pre></article>
-    <article class="ext"><p class="when">on · call · contact “Ma”</p><h4>Parents’ shield</h4><p>Calls to a parent’s phone that ask for OTPs or bank details are flagged and ended.</p><pre><span class="k">on</span>.call(<span class="s">{ device: "ma" }</span>)
-  .watch(<span class="s">["otp","kyc","bank"]</span>)
-  .warn().end()</pre></article>
-    <article class="ext"><p class="when">on · call · business hours</p><h4>Clinic front desk</h4><p>Answers, quotes prices, and books into the calendar while the dentist works.</p><pre><span class="k">on</span>.call(<span class="s">{ hours: "10-19" }</span>)
-  .know(<span class="s">"clinic.md"</span>)
-  .book(<span class="s">"calendar"</span>)</pre></article>
-  </div>
-</section>
-
-<!-- ================= BUSINESS ================= -->
-<section class="band" id="business">
-  <div class="wrap">
-    <div class="head reveal">
-      <p class="eyebrow">For business</p>
-      <h2>A front desk<br>in every pocket.</h2>
-      <p class="lead">India has <b>over 60 million small businesses</b>, and most of them run on one owner’s phone. When the owner is busy, the business doesn’t answer.<sup class="fn"><a href="#fn4">4</a></sup></p>
-    </div>
-    <div class="bento">
-      <div class="tile w4 reveal">
-        <p class="who">Dental clinic · Indiranagar</p>
-        <h3>Dr. Iyer is mid‑procedure.<br>Rethink books the 4:30.</h3>
-        <p>It knows the clinic’s hours, prices and calendar. It answers in the patient’s language, offers free slots and confirms by SMS.</p>
-        <div class="slots"><span class="taken">3:30</span><span class="taken">4:00</span><span class="new">4:30 · booked</span><span>5:00</span></div>
-      </div>
-      <div class="tile w2 reveal">
-        <p class="who">Kirana store</p>
-        <p class="big sheen">38</p>
-        <h3>orders taken by phone in a day, with both hands at the counter.</h3>
-      </div>
-      <div class="tile w2 reveal">
-        <p class="who">Parents</p>
-        <h3>Scam calls stop at Rethink.</h3>
-        <div class="scam"><i>!</i><span>“KYC update” caller asked for an OTP. Call ended. Family notified.</span></div>
-      </div>
-      <div class="tile w2 reveal">
-        <p class="who">Accessibility</p>
-        <h3>Phones for people who can’t use touchscreens.</h3>
-        <p>Everything by voice. No grid of icons to learn.</p>
-      </div>
-      <div class="tile w2 reveal">
-        <p class="who">Languages</p>
-        <h3>Speaks the caller’s language.</h3>
-        <div class="lang"><span>English</span><span>हिन्दी</span><span>ಕನ್ನಡ</span><span>தமிழ்</span><span>Hinglish</span></div>
-      </div>
-    </div>
-    <div class="compare">
-      <div class="reveal"><h4>Rethink Phone</h4><p class="pr2">On your own phone and number</p><ul><li>Install on a supported Android phone</li><li>Answers personal calls, screens strangers</li><li>Extensions you write by chatting</li></ul></div>
-      <div class="reveal"><h4>Rethink for Business</h4><p class="pr2">Per seat, per month</p><ul><li>Bookings, orders and FAQs from your own notes</li><li>Calendar, WhatsApp and SMS confirmations</li><li>Call log and summaries for the whole team</li></ul></div>
-    </div>
-    <p class="illus">Business scenarios and names are illustrative and show planned features.<sup class="fn"><a href="#fn4">4</a></sup></p>
+    <article class="ext"><p class="when">on · incoming call · since 18 Nov</p><h4>Answers your calls</h4><p>Picks up after two seconds, talks to the caller in their language, takes a message, and leaves you a summary. <a class="link" href="#hear">Hear the first call ›</a></p><pre><span class="k">[18:31:09]</span> call connected
+<span class="k">[18:34:29]</span> call ended by agent
+           after 200 s
+<span class="k">[18:34:34]</span> summary:
+  <span class="s">Gaurav — Blinkit milk order</span></pre></article>
+    <article class="ext"><p class="when">experiment 01 · mcp server</p><h4>Claude operates the phone</h4><p>Claude gets 13 tools on the phone: read the screen, tap, type, call, text. Every tool call lands in an audit log. <a class="link" href="/experiments/claude-operates-the-phone/">Experiment 01 ›</a></p><pre><span class="k">14:05:00</span> get_screen
+  <span class="s">{screenshot: true}</span>
+<span class="k">14:05:30</span> place_call
+  <span class="s">{number: "+91 XXXXX XXXXX"}</span>
+<span class="k">14:05:34</span> get_screen</pre></article>
+    <article class="ext"><p class="when">experiment 02 · root</p><h4>Claude runs on the phone</h4><p>Claude Code in a small Debian on the phone, with root. Asked to call someone, it looks up the contact and dials. <a class="link" href="/experiments/claude-runs-on-the-phone/">Experiment 02 ›</a></p><pre><span class="k">16:18:10</span> content query --uri
+  <span class="s">content://com.android</span>
+  <span class="s">.contacts/data/phones</span>
+<span class="k">16:18:16</span> am start -a
+  <span class="s">android.intent.action.CALL</span>
+  -d <span class="s">tel:+91XXXXXXXXXX</span></pre></article>
+    <article class="ext"><p class="when">experiment 03 · on a call</p><h4>Orders groceries while you’re on the line</h4><p>You call and ask for milk. Claude shops on blinkit.com in the phone’s browser, reads back the cart, and orders only after you say yes. <a class="link" href="/experiments/a-phone-call-orders-groceries/">Experiment 03 ›</a></p><pre>blinkit_order
+  <span class="s">{request: "a carton of milk"}</span>
+  <span class="k">→</span> ready · ₹154
+    pay on delivery
+blinkit_confirm()
+  <span class="k">→</span> placed</pre></article>
   </div>
 </section>
 
@@ -913,17 +885,17 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <div class="reveal">
         <svg viewBox="0 0 44 44"><rect x="9" y="19" width="26" height="19" rx="5"/><path d="M15 19v-5a7 7 0 0 1 14 0v5"/><circle cx="22" cy="28.5" r="2.5"/></svg>
         <h3>It says it’s an assistant.</h3>
-        <p>Every call opens by telling the caller they’re talking to an assistant. Rethink never pretends to be you, and never clones your voice.</p>
+        <p>Rethink never pretends to be you, and never clones your voice.</p>
       </div>
       <div class="reveal">
         <svg viewBox="0 0 44 44"><path d="M22 6 8 12v9c0 9 6 15 14 17 8-2 14-8 14-17v-9z"/><path d="m16 22 4 4 8-8"/></svg>
         <h3>It only claims what it did.</h3>
-        <p>Messages, bookings and hang‑ups are real actions with real confirmations. If something fails, the caller is told.</p>
+        <p>If something fails, the caller is told.</p>
       </div>
       <div class="reveal">
         <svg viewBox="0 0 44 44"><rect x="12" y="5" width="20" height="34" rx="5"/><path d="M19 33h6"/><path d="M8 16v12M36 16v12"/></svg>
         <h3>It lives on your phone.</h3>
-        <p>Transcripts, notes and extensions are stored on the device. Only live audio goes to the voice model, for the length of the call.</p>
+        <p>Transcripts and notes are stored on the device, not on a Rethink server.</p>
       </div>
     </div>
   </div>
@@ -933,36 +905,18 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <section class="band" id="plan">
   <div class="wrap">
     <div class="head reveal">
-      <p class="eyebrow">Roadmap</p>
-      <h2>From one phone<br>to everyone’s.</h2>
+      <p class="eyebrow">Build log</p>
+      <h2>What works,<br>and when.</h2>
     </div>
     <div class="road reveal">
-      <div class="done"><b>Nov 2026 · done</b><h4>AI answers real calls</h4><p>In‑call audio solved on stock LineageOS. Search, messages and hang‑up working.</p></div>
-      <div class="next"><b>Dec 2026</b><h4>Fully on the phone</h4><p>Runtime moves off the laptop. A public number anyone can call.</p></div>
-      <div><b>Q1 2027</b><h4>Rethink home</h4><p>Boots into Rethink. WhatsApp and notifications by voice.</p></div>
-      <div><b>Q2 2027</b><h4>Extensions</h4><p>Create by chat, share by link, permission review.</p></div>
-      <div><b>Q3 2027</b><h4>Clinic pilot</h4><p>10 small businesses in India on Rethink for Business.</p></div>
-      <div><b>Q4 2027</b><h4>Open beta</h4><p>More devices, one‑tap installer, Hindi‑first voices.</p></div>
+      <div class="done"><b>18 Nov 2026</b><h4><a href="#hear">AI answers real calls</a></h4><p>In‑call audio solved on stock LineageOS. Search, messages and hang‑up working.</p></div>
+      <div class="done"><b>22 Nov</b><h4><a href="/experiments/claude-operates-the-phone/">Claude operates the phone</a></h4><p>An MCP server on the phone gives Claude 13 tools, with an audit log.</p></div>
+      <div class="done"><b>22 Nov</b><h4><a href="/experiments/claude-runs-on-the-phone/">Claude runs on the phone</a></h4><p>Debian and Claude Code on the handset, with root.</p></div>
+      <div class="done"><b>22 Nov</b><h4>Off the laptop</h4><p>The call bridge, Claude and the browser all run on the phone now.</p></div>
+      <div class="done"><b>22 Nov</b><h4><a href="/experiments/a-phone-call-orders-groceries/">A call orders groceries</a></h4><p>Claude shops in the phone’s browser while you listen on the call.</p></div>
+      <div class="next"><b>Next</b><h4>Starts on its own</h4><p>Today a reboot needs a script over USB. Next, the phone boots straight into Rethink.</p></div>
     </div>
-    <div class="funds">
-      <div class="reveal">
-        <p class="eyebrow">The ask</p>
-        <p class="askbig sheen">$100K</p>
-        <p class="lead">Twelve months to take Rethink from one working phone to a public beta and a paying pilot.</p>
-      </div>
-      <div class="reveal">
-        <div class="stack" aria-hidden="true">
-          <i style="flex:45;background:#111112"></i><i style="flex:20;background:#48484a"></i><i style="flex:15;background:#7c7c80"></i><i style="flex:10;background:#aeaeb2"></i><i style="flex:10;background:#d8d8dc"></i>
-        </div>
-        <div class="alloc">
-          <div><i style="background:#111112"></i><p><b>On‑device runtime &amp; home</b><span>Engineering for the agent, launcher and extension system</span></p><em>$45K</em></div>
-          <div><i style="background:#48484a"></i><p><b>Voice and model usage</b><span>Live calls for beta users and the public demo line</span></p><em>$20K</em></div>
-          <div><i style="background:#7c7c80"></i><p><b>Business pilot</b><span>Onboarding 10 clinics and stores, Indic voices</span></p><em>$15K</em></div>
-          <div><i style="background:#aeaeb2"></i><p><b>Device lab</b><span>Phones across chipsets to widen support</span></p><em>$10K</em></div>
-          <div><i style="background:#d8d8dc"></i><p><b>Privacy &amp; security</b><span>External review of permissions and call data</span></p><em>$10K</em></div>
-        </div>
-      </div>
-    </div>
+    <p class="loglink reveal"><a class="link" href="/experiments/">All experiments ›</a></p>
   </div>
 </section>
 
@@ -972,9 +926,9 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <img class="flat reveal" src="assets/phone/flat.webp" width="1400" height="1374" alt="Rethink Phone lying face up while Rethink answers an incoming call from Rahul Mehta" loading="lazy">
     <p class="eyebrow"><span class="lamp"></span>Rethink Phone</p>
     <h2>The phone,<br><span class="sheen">rethought.</span></h2>
-    <p class="lead">Answering real calls on a OnePlus Nord CE 3 Lite since 18 November 2026.<sup class="fn"><a href="#fn5">5</a></sup></p>
+    <p class="lead">Answering real calls on a OnePlus Nord CE 3 Lite since 18 November 2026.<sup class="fn"><a href="#fn4">4</a></sup></p>
     <div class="mail"><code id="mail">gaurav@rethinkphone.tech</code><button class="pill" id="copy">Copy</button></div>
-    <div class="founder"><i>G</i><span><b>Gaurav</b> · Founder, India<br>Built the first version in a day.</span></div>
+    <div class="founder"><i>G</i><span>Behind this: <b><a href="https://www.linkedin.com/in/gauravtiwari5050/" rel="me noopener" target="_blank">Gaurav Tiwari</a></b><br>Building this in Bangalore with the help of ChatGPT and Claude.</span></div>
   </div>
 </section>
 
@@ -985,11 +939,10 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <ol>
       <li id="fn1">Measured on the first AI‑answered call, 18 Nov 2026: OnePlus Nord CE 3 Lite 5G (CPH2467) on LineageOS 24.0, Airtel VoLTE. Approximate time from the end of the caller’s speech to the start of the assistant’s audio.</li>
       <li id="fn2">OpenAI GPT‑Live list price per minute of streamed audio, November 2026. Tool calls and summaries are billed separately.</li>
-      <li id="fn3">Excerpt trimmed to 53 seconds; an 11‑second pause while the assistant tried a lookup was removed. The caller is the founder, calling from a second phone. That build could not yet search the web; the current build can.</li>
-      <li id="fn4">Phone screens, business scenarios, names and the kirana order count are illustrative and describe planned features. Small‑business count from Indian government MSME estimates.</li>
-      <li id="fn5">Prototype status: call audio is captured and played on the phone; the agent runtime currently runs on a laptop connected over USB. Moving it fully onto the phone is the first milestone of this plan.</li>
+      <li id="fn3">Excerpt trimmed to 53 seconds; an 11‑second pause while the assistant tried a lookup was removed. The caller is Gaurav Tiwari, calling from a second phone. That build could not yet search the web; the current build can.</li>
+      <li id="fn4">Prototype status: everything runs on the phone, from answering the call to the voice bridge, Claude and the browser. The voice and language models run in OpenAI’s and Anthropic’s clouds. After a reboot, the services are started with a script over USB.</li>
     </ol>
-    <div class="base"><span>Rethink Phone · India · 2026</span><span>Built on LineageOS. Not affiliated with OnePlus or OpenAI.</span></div>
+    <div class="base"><span>Rethink Phone · India · 2026</span><span>Built on LineageOS. Not affiliated with OnePlus, OpenAI or Anthropic.</span></div>
   </div>
   <div class="sign" aria-hidden="true">Rethink<span class="sheen">.</span></div>
 </footer>
@@ -997,6 +950,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <script>
 (() => {
   document.documentElement.classList.add('js');
+  document.querySelectorAll('.demo video').forEach((v, _, all) => v.addEventListener('play', () => all.forEach((o) => o !== v && o.pause())));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
