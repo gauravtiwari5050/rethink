@@ -41,3 +41,7 @@
 .bfoot span { margin-right: auto; }
 .post > *, .expindex > * { max-width: 760px; }
 .expindex > .list { max-width: 900px; }
+.prose .warn { border: 1.5px solid #e5352b; background: #fdf0ef; border-radius: 14px; padding: 16px 20px; color: #3a1210; }
+.prose .warn p { margin: 0; }
+.prose .warn .warn-t { font: 600 .78rem var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: #c42b22; margin-bottom: 6px; }
+.prose .warn strong { color: #8f1d16; }
