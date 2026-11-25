@@ -42,7 +42,11 @@ h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; text-wrap: balance
 .times, .codecard, pre, code, .lines li .ts, .bub.t, .incall .hd span { font-variation-settings: "wdth" 87.5; }
 p { margin: 0; }
 .sheen { }  /* one face, one style: no accent italics */
-.sign .sheen { color: var(--light); text-shadow: 0 0 .08em var(--glow), 0 0 .3em var(--glow); }
+/* the i's dot is the device light */
+.sign .i { position: relative; display: inline-block; }
+.sign .i i { position: absolute; left: 50%; top: 0.099em; width: 0.132em; aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, #f2fff7 0 16%, var(--light) 48%, #12a656 100%);
+  box-shadow: 0 0 .05em .01em var(--glow), 0 0 .25em .04em rgba(47,227,131,.35), 0 0 .6em .1em rgba(47,227,131,.18); }
 .lamp { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle, #f2fff7 0 18%, var(--light) 45%, #12a656 100%); box-shadow: 0 0 6px 1px var(--glow), 0 0 16px 2px rgba(47,227,131,.25); flex: none; }
 .eyebrow { font: 600 0.95rem/1.2 var(--font-body); letter-spacing: -0.005em; color: var(--fg); display: flex; align-items: center; gap: 10px; }
 .eyebrow::before { content: none; }
@@ -959,7 +963,7 @@ blinkit_confirm()
     </ol>
     <div class="base"><span>Rethink Phone · India · 2026</span><span>Built on LineageOS. Not affiliated with OnePlus, OpenAI or Anthropic.</span></div>
   </div>
-  <div class="sign" aria-hidden="true">Rethink<span class="sheen">.</span></div>
+  <div class="sign" aria-hidden="true">Reth<span class="i">ı<i></i></span>nk</div>
 </footer>
 
 <script>
