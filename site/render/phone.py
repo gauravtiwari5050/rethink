@@ -4,6 +4,7 @@
 #   preview          three angles at low samples, for checking the look
 #   seq <n>          scroll turntable: front 3/4 -> profile -> back, n frames
 #   flat             phone lying face-up, incoming call from an unknown number
+#   still            one turntable frame at a given yaw (seq's camera), e.g. the back matching f000
 import bpy, bmesh, math, sys, os
 from mathutils import Vector
 
@@ -267,6 +268,15 @@ elif MODE == 'seq':
         t = ease(i / (n - 1))
         pose(-24 + t * (200 + 24), tilt_deg=-4 + 2 * math.sin(math.pi * t))
         render(os.path.join(OUT, f'f{i:03d}.png'), samples=int(argv[3]) if len(argv) > 3 else 96)
+
+elif MODE == 'still':
+    # one turntable frame at a given yaw, same camera and framing as seq; yaw+180 shows the back with the same outline
+    # argv: still <outdir> <yaw> [samples] [name]
+    yaw = float(argv[2]); samples = int(argv[3]) if len(argv) > 3 else 96
+    sc = screen(os.path.join(SCREENS, 'screen-home.png')); sc.parent = rig
+    aim((0, -7.2, 0.35))
+    pose(yaw, tilt_deg=-4)
+    render(os.path.join(OUT, (argv[4] if len(argv) > 4 else f'still-{int(yaw)}') + '.png'), samples=samples)
 
 elif MODE == 'backface':
     # straight-on back for the page: teletype left dark so the page can type into it live
