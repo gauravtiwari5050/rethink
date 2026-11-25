@@ -24,7 +24,7 @@ html = f'''<!doctype html><html><head><meta charset="utf-8">
   <div class="greet">Good evening, Gaurav.<span>Here’s what I handled today.</span></div>
   <div class="orb"></div>
   <div class="hcards">
-    <div class="hcard"><b>2 calls answered</b><span>Rahul: dinner moved to Friday. Clinic: Tuesday 4:30 confirmed.</span></div>
+    <div class="hcard"><b>2 calls answered</b><span>Unknown number: dinner moved to Friday, wants a call back. Courier: parcel left at the gate.</span></div>
     <div class="hcard"><b>WhatsApp · 6 messages</b><span>Nothing urgent. Ma asked if you’re coming Sunday.</span></div>
   </div>
   <div class="ask"><i></i>Ask Rethink anything</div>
@@ -34,18 +34,13 @@ html = f'''<!doctype html><html><head><meta charset="utf-8">
   <div class="tag">Rethink is answering</div>
   <div class="btns"><span class="btn no">{handset}</span><span class="btn yes">{handset}</span></div>
 </div>
-<div class="layer ring" id="ring">
-  <div class="avatar">R</div><div class="who">Rahul Mehta</div><div class="sub">mobile · Bengaluru</div>
-  <div class="tag">Rethink is answering</div>
-  <div class="btns"><span class="btn no">{handset}</span><span class="btn yes">{handset}</span></div>
 </div>
-</div>
-<script>const k=location.hash.slice(1)||'home';document.getElementById(k).classList.add('show');if(k==='ring'||k==='call')document.getElementById('t').textContent='9:41';</script>
+<script>const k=location.hash.slice(1)||'home';document.getElementById(k).classList.add('show');if(k==='call')document.getElementById('t').textContent='9:41';</script>
 </body></html>'''
 open(os.path.join(here, 'screens.html'), 'w').write(html)
 chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 import sys
-for k in (sys.argv[1:] or ['home', 'ring', 'call']):
+for k in (sys.argv[1:] or ['home', 'call']):
     subprocess.run([chrome, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=2', '--window-size=540,1170',
                     '--virtual-time-budget=4000', f'--screenshot={os.path.join(here, "out", f"screen-{k}.png")}', f'file://{os.path.join(here, "screens.html")}#{k}'],
                    stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)

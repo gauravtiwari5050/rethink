@@ -10,7 +10,7 @@ import { execFileSync } from 'node:child_process';
 
 const PORT = Number(process.argv[2] || 7071);
 const SCRIPT = [
-  [3000, 'Hi, this is Rahul. What is the weather like in Bangalore today?'],
+  [3000, 'Hi there. What is the weather like in Bangalore today?'],
   [14000, 'Okay. Can you tell Gaurav to call me back about the dinner on Friday? My number is 98450 12345.'],
   [12000, "That's all, thanks. You can hang up now. Bye!"],
 ];

@@ -291,7 +291,7 @@ elif MODE == 'flip':
     # argv: flip <outdir> <frames> <samples> [t-list]   (t > 1 renders the back with the light off, for the brief)
     n = int(argv[2]); samples = int(argv[3])
     ts = [float(x) for x in argv[4].split(',')] if len(argv) > 4 else [i / (n - 1) for i in range(n)]
-    sc = screen(os.path.join(SCREENS, 'screen-ring.png')); sc.parent = rig
+    sc = screen(os.path.join(SCREENS, 'screen-call.png')); sc.parent = rig
     bpy.data.materials['teletext'].node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value = 0.0
     lnt = M_RINGL.node_tree
     kmul = lnt.nodes.new('ShaderNodeMath'); kmul.operation = 'MULTIPLY'

@@ -42,6 +42,28 @@ h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; text-wrap: balance
 .times, .codecard, pre, code, .lines li .ts, .bub.t, .incall .hd span { font-variation-settings: "wdth" 87.5; }
 p { margin: 0; }
 .sheen { }  /* one face, one style: no accent italics */
+/* Oscar, a yellow lab, plays fetch with the light (footer wordmark) */
+.sign { position: relative; }
+.sign .ball { position: absolute; left: 0; top: 0; width: 0.132em; aspect-ratio: 1; border-radius: 50%; will-change: transform;
+  background: radial-gradient(circle at 50% 45%, #f2fff7 0 16%, var(--light) 48%, #12a656 100%);
+  box-shadow: 0 0 .05em .01em var(--glow), 0 0 .25em .04em rgba(47,227,131,.35), 0 0 .6em .1em rgba(47,227,131,.18); }
+.oscar { position: absolute; left: 0; top: 0; width: 0.6em; height: 0.4em; overflow: visible; will-change: transform; pointer-events: none; }
+.oscar .leg { transform-box: view-box; }
+.oscar .lf, .oscar .lf2 { transform-origin: 84px 50px; }
+.oscar .lb, .oscar .lb2 { transform-origin: 40px 50px; }
+.oscar.run .lf, .oscar.run .lb2 { animation: oscar-a .3s linear infinite; }
+.oscar.run .lf2, .oscar.run .lb { animation: oscar-b .3s linear infinite; }
+.oscar.run .bod { animation: oscar-bob .3s ease-in-out infinite; }
+.oscar .tail { transform-box: view-box; transform-origin: 26px 40px; }
+.oscar.carry .tongue { display: none; }
+.oscar.wag .tail { animation: oscar-wag .18s ease-in-out infinite alternate; }
+.oscar .ear { transform-box: view-box; transform-origin: 89px 11px; }
+.oscar.run .ear { animation: oscar-ear .3s ease-in-out infinite alternate; }
+@keyframes oscar-a { 0%, 100% { transform: rotate(34deg); } 50% { transform: rotate(-30deg); } }
+@keyframes oscar-b { 0%, 100% { transform: rotate(-30deg); } 50% { transform: rotate(32deg); } }
+@keyframes oscar-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes oscar-wag { from { transform: rotate(-14deg); } to { transform: rotate(18deg); } }
+@keyframes oscar-ear { from { transform: rotate(-8deg); } to { transform: rotate(14deg); } }
 /* the i's dot is the device light */
 .sign .i { position: relative; display: inline-block; }
 .sign .i i { position: absolute; left: 50%; top: 0.099em; width: 0.132em; aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%;
@@ -74,6 +96,7 @@ sup.fn a { text-decoration: none; }
 .link { color: var(--fg); text-decoration: none; font-weight: 500; background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat; padding-bottom: 2px; transition: background-size .5s var(--ease); }
 .link:hover { background-size: 0 1px; background-position: 100% 100%; }
 @media (max-width: 860px) { .nav nav { display: none; } .nav .pill { margin-left: auto; } }
+.pill .gh { width: 15px; height: 15px; fill: currentColor; flex: none; }
 
 /* ---------- phone object (dark hardware on a light stage) ---------- */
 .phone { --w: clamp(230px, 24vw, 310px); width: var(--w); aspect-ratio: 9 / 19.6; border-radius: calc(var(--w) * 0.16); padding: calc(var(--w) * 0.035);
@@ -513,7 +536,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <a href="#answer">Calls</a>
       <a href="#hear">Hear it</a>
     </nav>
-    <a class="pill" href="#hear">Hear a real call</a>
+    <a class="pill" href="https://github.com/gauravtiwari5050/rethink" rel="noopener" target="_blank"><svg class="gh" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
   </div>
 </header>
 
@@ -532,7 +555,7 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
       </div>
     </div>
     <div class="turn" id="turn">
-      <img id="turnImg" src="assets/phone/f000.webp" width="800" height="1000" alt="Rethink Phone concept render. The home screen shows one assistant and a summary of the calls it answered.">
+      <img id="turnImg" src="assets/phone/f000.webp?v=2" width="800" height="1000" alt="Rethink Phone concept render. The home screen shows one assistant and a summary of the calls it answered.">
       <canvas id="turnCv" width="800" height="1000" aria-hidden="true"></canvas>
       <p class="callout c1" id="c1"><b>8.7 mm</b><span>Bead‑blasted aluminium frame.</span></p>
       <p class="callout c2" id="c2"><b>One lens, one light</b><span>Glows while Rethink is on a call.</span></p>
@@ -702,9 +725,9 @@ footer .base { display: flex; justify-content: space-between; gap: 16px; flex-wr
       </div>
 
       <figure class="flipfig" id="flipFig" aria-label="Rethink Phone ringing, then turned over: the light around the camera comes on and the teletype prints the call">
-        <img id="flipImg" src="assets/flip/g000.webp" alt="" decoding="async">
+        <img id="flipImg" src="assets/flip/g000.webp?v=2" alt="" decoding="async">
         <canvas id="flipCv" width="620" height="1230"></canvas>
-        <img id="flipOff" class="flipoff" src="assets/flip/off.webp" alt="" decoding="async" loading="lazy">
+        <img id="flipOff" class="flipoff" src="assets/flip/off.webp?v=2" alt="" decoding="async" loading="lazy">
         <div class="tty" id="tty2" aria-hidden="true"><div class="hd"><span id="tty2Hd">RETHINK · ON A CALL</span><span id="tty2Clock">00:00</span></div><div class="in" id="tty2In"></div></div>
       </figure>
     </div>
@@ -1024,6 +1047,107 @@ blinkit_confirm()
     notifBox.style.setProperty('--m', clamp(mWant / 12).toFixed(3));
   }
 
+  /* Oscar plays fetch with the light on the i. Runs along the tops of the letters, bows to pick it up, runs off right,
+     comes back from the left with it, drops it home, and leaves. Paused off screen and for reduced motion. */
+  (() => {
+    const sign = document.querySelector('.sign'), dot = sign && sign.querySelector('.i i');
+    if (!dot || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const NS = 'http://www.w3.org/2000/svg';
+    const dog = document.createElementNS(NS, 'svg');
+    dog.setAttribute('viewBox', '0 0 120 80'); dog.setAttribute('class', 'oscar');
+    dog.innerHTML = `<title>Oscar</title>
+      <g class="pose"><g class="bod">
+        <path class="tail" d="M26 40 C16 38 9 33 5 25" fill="none" stroke="#dcae63" stroke-width="7" stroke-linecap="round"/>
+        <g class="cr hb"><g class="leg lb2"><rect x="30" y="46" width="12" height="30" rx="6" fill="#c99a52"/></g></g>
+        <g class="cr fb"><g class="leg lf2"><rect x="74" y="46" width="12" height="30" rx="6" fill="#c99a52"/></g></g>
+        <ellipse cx="56" cy="42" rx="34" ry="18" fill="#e8c07a"/>
+        <path d="M30 38 Q56 28 84 34" fill="none" stroke="#f4d89f" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+        <path d="M36 56 Q56 62 78 55" fill="none" stroke="#d6a95f" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+        <g class="cr hf"><g class="leg lb"><rect x="35" y="46" width="13" height="30" rx="6.5" fill="#e3b46a"/><ellipse cx="42" cy="75" rx="8" ry="3.4" fill="#e3b46a"/></g></g>
+        <g class="cr ff"><g class="leg lf"><rect x="80" y="46" width="13" height="30" rx="6.5" fill="#e3b46a"/><ellipse cx="88" cy="75" rx="8" ry="3.4" fill="#e3b46a"/></g></g>
+        <path d="M74 32 Q82 16 94 14 L102 32 Q92 46 80 50 Z" fill="#e8c07a"/>
+        <path d="M80 30 Q88 38 99 35" fill="none" stroke="var(--light)" stroke-width="3.4" stroke-linecap="round"/>
+        <g class="head">
+          <ellipse cx="97" cy="20" rx="15" ry="13" fill="#ecc680"/>
+          <rect x="99" y="20" width="21" height="14" rx="7" fill="#ecc680"/>
+          <path class="tongue" d="M109 33 Q111 41 115 40 Q117 36 115 32 Z" fill="#f08a8a"/>
+          <ellipse cx="119" cy="24" rx="3.8" ry="3.3" fill="#2c211a"/>
+          <circle cx="101.5" cy="15.5" r="2.2" fill="#2c211a"/>
+          <path d="M98 11.5 Q101 10 104.5 11.5" fill="none" stroke="#c99a52" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M106 31.5 Q112 34 118 30.5" fill="none" stroke="#8a5a2b" stroke-width="1.4" stroke-linecap="round"/>
+          <path class="ear" d="M89 9 Q81 12 82 28 Q88 33 94 25 Q96 15 89 9 Z" fill="#c99a52"/>
+        </g>
+      </g></g>`;
+    sign.appendChild(dog);
+    sign.appendChild(dot); dot.className = 'ball';
+    const pose = dog.querySelector('.pose'), head = dog.querySelector('.head');
+
+    const MOUTH = [116, 34], HIP = [41, 50], NECK = [90, 28], LEGTOP = { hb: [36, 50], hf: [41, 50], fb: [80, 50], ff: [86, 50] };
+    const rot = ([x, y], [cx, cy], a) => { const c = Math.cos(a), s = Math.sin(a); return [cx + (x - cx) * c - (y - cy) * s, cy + (x - cx) * s + (y - cy) * c]; };
+    const HEAD = 0.5; let BODY = 0.45;
+    const mouthAt = (b) => rot(rot(MOUTH, NECK, b * HEAD), HIP, b * BODY);
+    const crs = [...dog.querySelectorAll('.cr')];
+    let em, home, ground, k, stopX, W;
+    const measure = () => {
+      dot.style.transform = 'none'; dot.style.visibility = 'hidden';
+      const sr = sign.getBoundingClientRect(), ir = sign.querySelector('.i').getBoundingClientRect();
+      em = parseFloat(getComputedStyle(sign).fontSize);
+      home = [ir.left - sr.left + ir.width / 2, ir.top - sr.top + 0.099 * em + 0.066 * em];   // centre of the light on the i
+      ground = home[1] - 0.039 * em;                                                          // tops of h and k
+      k = (0.4 * em) / 80;                                                                    // px per drawing unit
+      W = sr.width;
+      dot.style.visibility = '';
+      // tip the body just far enough that the mouth meets the light
+      const want = (home[1] - (ground - 76 * k)) / k;
+      let lo = 0, hi = 1.2; for (let i = 0; i < 30; i++) { BODY = (lo + hi) / 2; mouthAt(1)[1] < want ? (lo = BODY) : (hi = BODY); }
+      stopX = home[0] - mouthAt(1)[0] * k;
+    };
+    const place = (x, b, carrying) => {
+      const y = ground - 76 * k;
+      dog.style.transform = `translate(${x}px, ${y}px)`;
+      const deg = (a) => (a * 180 / Math.PI).toFixed(2);
+      pose.setAttribute('transform', `rotate(${deg(b * BODY)} ${HIP[0]} ${HIP[1]})`);
+      head.setAttribute('transform', `rotate(${deg(b * HEAD)} ${NECK[0]} ${NECK[1]})`);
+      // legs stay upright while the body tips
+      for (const g of crs) { const [cx, cy] = LEGTOP[g.classList[1]]; g.setAttribute('transform', `rotate(${deg(-b * BODY)} ${cx} ${cy})`); }
+      dog.classList.toggle('carry', carrying);
+      const d = 0.132 * em;
+      let c = home;
+      if (carrying) { const m = mouthAt(b); c = [x + m[0] * k, y + m[1] * k]; }
+      dot.style.transform = `translate(${c[0] - d / 2}px, ${c[1] - d / 2}px)`;
+    };
+    // the loop, in ms: idle, run in, bow and grab, run out with it, off stage, run in with it, bow and drop, run out
+    const P = [['idle', 2200], ['in', 1500], ['grab', 900], ['out', 1300], ['away', 900], ['in2', 1500], ['drop', 900], ['out2', 1300]];
+    const T = P.reduce((n, p) => n + p[1], 0);
+    const easeOut = (u) => 1 - (1 - u) ** 2.2, easeIn = (u) => u ** 1.8, bell = (u) => Math.sin(Math.PI * u);
+    const off = () => -0.75 * em, far = () => W + 0.1 * em;
+    let t0 = performance.now(), raf = 0, visible = false;
+    const frame = (now) => {
+      let t = (now - t0) % T, i = 0;
+      while (t >= P[i][1]) t -= P[i++][1];
+      const [ph, dur] = P[i], u = t / dur;
+      let x = off(), b = 0, carrying = false, run = false, wag = false;
+      switch (ph) {
+        case 'idle': case 'away': x = off(); carrying = ph === 'away'; break;
+        case 'in': case 'in2': x = off() + (stopX - off()) * easeOut(u); run = u < 0.92; carrying = ph === 'in2'; break;
+        case 'grab': case 'drop': x = stopX; b = bell(u); wag = true; carrying = ph === 'grab' ? u > 0.5 : u < 0.5; break;
+        case 'out': case 'out2': x = stopX + (far() - stopX) * easeIn(u); run = true; carrying = ph === 'out'; break;
+      }
+      dog.classList.toggle('run', run); dog.classList.toggle('wag', wag);
+      dog.style.visibility = (ph === 'idle' || ph === 'away') ? 'hidden' : '';
+      place(x, b, carrying);
+      raf = visible ? requestAnimationFrame(frame) : 0;
+    };
+    measure(); place(off(), 0, false);
+    addEventListener('resize', () => { measure(); });
+    document.fonts && document.fonts.ready.then(measure);
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible && !raf) { t0 = performance.now(); raf = requestAnimationFrame(frame); }
+    }).observe(sign);
+    window.__oscar = { frame: (ms) => { visible = false; cancelAnimationFrame(raf); raf = 0; frame(t0 + ms); } };
+  })();
+
   /* statement words */
   const wordsEl = document.getElementById('words');
   wordsEl.innerHTML = wordsEl.textContent.trim().split(/\s+/).map((w) => w.startsWith('*') ? `<span class="g">${w.slice(1)}</span>` : `<span>${w}</span>`).join(' ');
@@ -1038,7 +1162,7 @@ blinkit_confirm()
   const GF = 36, gframes = new Array(GF); let gLoaded = false, gShown = -1;
   function gload() {
     if (gLoaded) return; gLoaded = true;
-    for (let i = 0; i < GF; i++) { const im = new Image(); im.decoding = 'async'; im.onload = () => { gframes[i] = im; gShown = -1; }; im.src = `assets/flip/g${String(i).padStart(3, '0')}.webp`; }
+    for (let i = 0; i < GF; i++) { const im = new Image(); im.decoding = 'async'; im.onload = () => { gframes[i] = im; gShown = -1; }; im.src = `assets/flip/g${String(i).padStart(3, '0')}.webp?v=2`; }
   }
   function gpaint(want) {
     let i = want; while (i > 0 && !gframes[i]) i--;
@@ -1048,12 +1172,12 @@ blinkit_confirm()
   }
   const callScript = [
     ['rethink', 'Hi, you’ve reached Gaurav’s phone. I’m the assistant. Who’s calling?'],
-    ['caller', 'Hey, it’s Rahul. Is Gaurav around?'],
+    ['caller', 'Hi, is Gaurav around?'],
     ['think', 'calendar: meeting till 4'],
     ['rethink', 'Gaurav’s in a meeting. Want me to pass something on?'],
     ['caller', 'Tell Gaurav dinner moved to Friday. Call me back.'],
     ['think', 'take_message · saved'],
-    ['rethink', 'Done. I’ll ask Gaurav to call you about Friday. Bye, Rahul!'],
+    ['rethink', 'Done. I’ll ask Gaurav to call you back about Friday. Bye!'],
     ['think', 'end_call · brief Gaurav'],
   ];
   const totalChars = callScript.reduce((n, r) => n + r[1].length, 0);
@@ -1123,7 +1247,7 @@ blinkit_confirm()
     tctx.clearRect(0, 0, turnCv.width, turnCv.height); tctx.drawImage(im, 0, 0, turnCv.width, turnCv.height);
     shown = j; turn.classList.add('live');
   };
-  const load = (i) => { const im = new Image(); im.decoding = 'async'; im.src = `assets/phone/f${String(i).padStart(3, '0')}.webp`; im.onload = () => { if (i <= want) { shown = -1; paint(want); } }; frames[i] = im; };
+  const load = (i) => { const im = new Image(); im.decoding = 'async'; im.src = `assets/phone/f${String(i).padStart(3, '0')}.webp?v=2`; im.onload = () => { if (i <= want) { shown = -1; paint(want); } }; frames[i] = im; };
   load(0); window.requestIdleCallback ? window.requestIdleCallback(() => { for (let i = 1; i < NF; i++) load(i); }) : setTimeout(() => { for (let i = 1; i < NF; i++) load(i); }, 300);
   function heroScene(p) {
     const k = clamp(p / 0.26);
