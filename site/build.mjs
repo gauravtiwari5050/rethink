@@ -59,6 +59,7 @@ const head = ({ title, description, url, image = `${SITE}/assets/og.jpg`, type =
 <meta property="og:image" content="${image}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#ffffff">
+<script defer src="https://analytics.dpcsite.org/script.js" data-website-id="57697b7f-b75a-42fa-a0ab-86c3f2667560"></script>
 <style>
 :root { color-scheme: light; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
 body { margin: 0; }
