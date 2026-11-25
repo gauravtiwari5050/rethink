@@ -271,11 +271,13 @@ elif MODE == 'seq':
 
 elif MODE == 'still':
     # one turntable frame at a given yaw, same camera and framing as seq; yaw+180 shows the back with the same outline
-    # argv: still <outdir> <yaw> [samples] [name]
+    # argv: still <outdir> <yaw> [samples] [name] [tilt]
+    # the tilt is in the phone's own frame, so a back view (yaw near 180) takes the opposite sign to lean the same way
     yaw = float(argv[2]); samples = int(argv[3]) if len(argv) > 3 else 96
+    tilt = float(argv[5]) if len(argv) > 5 else -4
     sc = screen(os.path.join(SCREENS, 'screen-home.png')); sc.parent = rig
     aim((0, -7.2, 0.35))
-    pose(yaw, tilt_deg=-4)
+    pose(yaw, tilt_deg=tilt)
     render(os.path.join(OUT, (argv[4] if len(argv) > 4 else f'still-{int(yaw)}') + '.png'), samples=samples)
 
 elif MODE == 'backface':
